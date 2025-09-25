@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "936609146155",
+    "project_id": "proercloure",
+    "storage_bucket": "proercloure.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:936609146155:android:53627c1926b6d3c9fc116e",
+        "android_client_info": {
+          "package_name": "com.example.propercloure"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "936609146155-6s3dd7vkeungf79gdkvm394pd7v6pe4e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCGHL1GiCC9Rzy9hyPWQP_5k5vlGKl0zwE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "936609146155-6s3dd7vkeungf79gdkvm394pd7v6pe4e.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "936609146155-nc7djjvl228bseumccankjs1ljnsf035.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.propercloure"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
