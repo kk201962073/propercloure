@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:propercloure/presentation/page/add/add_page.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+  final bool hasExpense;
+  const HomePage({super.key, this.hasExpense = false});
 
   @override
   Widget build(BuildContext context) {
@@ -70,9 +72,20 @@ class HomePage extends StatelessWidget {
               const SizedBox(height: 50),
 
               // 지출 내역 없음
-              const Center(
-                child: Text("지출 내역이 없습니다.", style: TextStyle(fontSize: 16)),
-              ),
+              hasExpense
+                  ? Column(
+                      children: [
+                        _buildExpenseItem("월급", 10000),
+                        _buildExpenseItem("CU 편의점", -2700),
+                        _buildExpenseItem("메아커피", -3000),
+                      ],
+                    )
+                  : const Center(
+                      child: Text(
+                        "지출 내역이 없습니다.",
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ),
             ],
           ),
         ),
@@ -81,13 +94,13 @@ class HomePage extends StatelessWidget {
       // 플로팅 버튼
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // TODO: 지출 추가 화면으로 이동
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AddPage()),
+          );
         },
         backgroundColor: Colors.blue,
-        child: const Icon(
-          Icons.add,
-          color: Colors.white, // 아이콘 색상 흰색으로 변경
-        ),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
 
       // 하단 네비게이션
@@ -107,4 +120,25 @@ class HomePage extends StatelessWidget {
       ),
     );
   }
+}
+
+Widget _buildExpenseItem(String title, int amount) {
+  final isIncome = amount > 0;
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 4.0),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(title, style: const TextStyle(fontSize: 14)),
+        Text(
+          "${isIncome ? '+' : ''}$amount",
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: isIncome ? Colors.blue : Colors.red,
+          ),
+        ),
+      ],
+    ),
+  );
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:propercloure/presentation/page/Home/home_page.dart';
-import 'login_view_model.dart'; 
+import 'login_view_model.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
@@ -17,8 +17,8 @@ class LoginPage extends StatelessWidget {
             children: [
               Image.asset('assets/image/logo.png', width: 183, height: 183),
               const SizedBox(height: 24),
-              ElevatedButton.icon(
-                onPressed: () async {
+              GestureDetector(
+                onTap: () async {
                   final userCredential = await loginVM.signInWithGoogle();
                   if (userCredential != null) {
                     // 로그인 성공 → HomePage로 이동
@@ -33,15 +33,10 @@ class LoginPage extends StatelessWidget {
                     );
                   }
                 },
-                icon: const Icon(Icons.g_mobiledata),
-                label: const Text("Google로 로그인"),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
-                  ),
+                child: Image.asset(
+                  'assets/image/login.png',
+                  width: 183,
+                  height: 183,
                 ),
               ),
             ],
