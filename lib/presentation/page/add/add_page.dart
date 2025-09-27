@@ -6,26 +6,15 @@ import 'package:provider/provider.dart';
 
 class AddPage extends StatefulWidget {
   final DateTime initialDate;
-  const AddPage({super.key, required this.initialDate});
+
+  const AddPage({Key? key, required this.initialDate}) : super(key: key);
 
   @override
-  State<AddPage> createState() => _AddPageState();
+  _AddPageState createState() => _AddPageState();
 }
 
 class _AddPageState extends State<AddPage> {
-  late TextEditingController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+  final TextEditingController _controller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +22,7 @@ class _AddPageState extends State<AddPage> {
       create: (_) => AddViewModel(widget.initialDate),
       child: Consumer<AddViewModel>(
         builder: (context, viewModel, child) {
+          // TextField 값 동기화
           final newText = viewModel.amountRight.toString();
           if (_controller.text != newText) {
             _controller.text = newText;
@@ -61,22 +51,21 @@ class _AddPageState extends State<AddPage> {
                 children: [
                   GestureDetector(
                     onTap: () async {
-                      final DateTime? picked = await showDatePicker(
+                      final picked = await showDatePicker(
                         context: context,
                         initialDate: viewModel.selectedDate,
                         firstDate: DateTime(2000),
                         lastDate: DateTime(2100),
                       );
+                      if (!mounted) return;
                       if (picked != null && picked != viewModel.selectedDate) {
-                        print('Date picked: $picked');
                         viewModel.setDate(picked);
-                        print(
-                          'Date updated in viewModel: ${viewModel.selectedDate}',
-                        );
                       }
                     },
                     child: Text(
-                      '${viewModel.selectedDate.year}년 ${viewModel.selectedDate.month.toString().padLeft(2, '0')}월 ${viewModel.selectedDate.day.toString().padLeft(2, '0')}일',
+                      '${viewModel.selectedDate.year}년 '
+                      '${viewModel.selectedDate.month.toString().padLeft(2, '0')}월 '
+                      '${viewModel.selectedDate.day.toString().padLeft(2, '0')}일',
                       style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w500,
@@ -113,11 +102,7 @@ class _AddPageState extends State<AddPage> {
                               contentPadding: EdgeInsets.zero,
                             ),
                             onChanged: (value) {
-                              final parsed = int.tryParse(value) ?? 0;
-                              viewModel.amountRight = parsed;
-                              print(
-                                'TextField changed: value=$value, amountRight=${viewModel.amountRight}',
-                              );
+                              viewModel.amountRight = int.tryParse(value) ?? 0;
                             },
                           ),
                         ),
@@ -137,19 +122,16 @@ class _AddPageState extends State<AddPage> {
                             ),
                           ),
                           onPressed: () async {
-                            print('Deposit button pressed:');
-                            print('amountRight: ${viewModel.amountRight}');
-                            print('selectedDate: ${viewModel.selectedDate}');
                             final result = await Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => DepositPage(
+                                builder: (_) => DepositPage(
                                   amount: viewModel.amountRight,
                                   selectedDate: viewModel.selectedDate,
                                 ),
                               ),
                             );
-                            print('result: $result');
+                            if (!mounted) return;
                             String category = '';
                             if (result != null) {
                               if (result is String) {
@@ -158,18 +140,12 @@ class _AddPageState extends State<AddPage> {
                                   result['category'] is String) {
                                 category = result['category'];
                               }
-                              Navigator.pop(context, {
-                                'amount': viewModel.amountRight.abs(),
-                                'category': category,
-                                'date': viewModel.selectedDate,
-                              });
-                            } else {
-                              Navigator.pop(context, {
-                                'amount': viewModel.amountRight.abs(),
-                                'category': '',
-                                'date': viewModel.selectedDate,
-                              });
                             }
+                            Navigator.pop(context, {
+                              'amount': viewModel.amountRight.abs(),
+                              'category': category,
+                              'date': viewModel.selectedDate,
+                            });
                           },
                           child: const Text(
                             "입금",
@@ -192,19 +168,16 @@ class _AddPageState extends State<AddPage> {
                             ),
                           ),
                           onPressed: () async {
-                            print('Expense button pressed:');
-                            print('amountRight: ${viewModel.amountRight}');
-                            print('selectedDate: ${viewModel.selectedDate}');
                             final result = await Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => ExpensePage(
+                                builder: (_) => ExpensePage(
                                   amount: viewModel.amountRight,
                                   selectedDate: viewModel.selectedDate,
                                 ),
                               ),
                             );
-                            print('result: $result');
+                            if (!mounted) return;
                             String category = '';
                             if (result != null) {
                               if (result is String) {
@@ -213,18 +186,12 @@ class _AddPageState extends State<AddPage> {
                                   result['category'] is String) {
                                 category = result['category'];
                               }
-                              Navigator.pop(context, {
-                                'amount': -viewModel.amountRight.abs(),
-                                'category': category,
-                                'date': viewModel.selectedDate,
-                              });
-                            } else {
-                              Navigator.pop(context, {
-                                'amount': -viewModel.amountRight.abs(),
-                                'category': '',
-                                'date': viewModel.selectedDate,
-                              });
                             }
+                            Navigator.pop(context, {
+                              'amount': -viewModel.amountRight.abs(),
+                              'category': category,
+                              'date': viewModel.selectedDate,
+                            });
                           },
                           child: const Text(
                             "지출",
