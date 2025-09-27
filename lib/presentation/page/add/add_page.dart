@@ -1,3 +1,5 @@
+import 'package:propercloure/presentation/page/category/deposit/deposit_page.dart';
+import 'package:propercloure/presentation/page/category/expense/expense_page.dart';
 import 'package:flutter/material.dart';
 import 'package:propercloure/presentation/page/add/add_view_model.dart';
 import 'package:provider/provider.dart';
@@ -121,7 +123,14 @@ class AddPage extends StatelessWidget {
                               borderRadius: BorderRadius.zero,
                             ),
                           ),
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => DepositPage(),
+                              ),
+                            );
+                          },
                           child: const Text(
                             "입금",
                             style: TextStyle(
@@ -142,7 +151,14 @@ class AddPage extends StatelessWidget {
                               borderRadius: BorderRadius.zero,
                             ),
                           ),
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ExpensePage(),
+                              ),
+                            );
+                          },
                           child: const Text(
                             "지출",
                             style: TextStyle(
