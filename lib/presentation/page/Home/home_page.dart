@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:propercloure/presentation/page/add/add_page.dart';
-import 'package:table_calendar/table_calendar.dart';
 import 'package:provider/provider.dart';
+import 'package:table_calendar/table_calendar.dart';
+import 'package:propercloure/presentation/page/Home/home_view_model.dart';
 
-class Transaction {
+class TransactionModel {
   final String title;
   final int amount;
   final String category;
 
-  Transaction({
+  TransactionModel({
     required this.title,
     required this.amount,
     required this.category,
@@ -16,7 +17,7 @@ class Transaction {
 }
 
 class HomeViewModel extends ChangeNotifier {
-  List<Transaction> transactions = [];
+  List<TransactionModel> transactions = [];
 
   int selectedYear = DateTime.now().year;
   int selectedMonth = DateTime.now().month;
@@ -46,7 +47,7 @@ class HomeViewModel extends ChangeNotifier {
 
   void addTransaction(String title, int amount, String category) {
     transactions.add(
-      Transaction(title: title, amount: amount, category: category),
+      TransactionModel(title: title, amount: amount, category: category),
     );
     notifyListeners();
   }
@@ -266,9 +267,6 @@ class HomePage extends StatelessWidget {
                   } else if (amountDynamic is String) {
                     amount = int.tryParse(amountDynamic) ?? 0;
                   }
-
-                  // Respect the sign of the amount as is (positive or negative)
-                  // No forced absolute value
 
                   final dynamic categoryDynamic = result['category'];
                   final String category = categoryDynamic is String
