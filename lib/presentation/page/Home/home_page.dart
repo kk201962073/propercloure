@@ -14,6 +14,7 @@ class HomePage extends StatelessWidget {
       create: (_) => HomeViewModel(),
       child: Consumer<HomeViewModel>(
         builder: (context, viewModel, _) {
+          DateTime selectedDay = viewModel.selectedDay;
           return Scaffold(
             body: SafeArea(
               child: Padding(
@@ -119,19 +120,17 @@ class HomePage extends StatelessWidget {
                         ),
                       ],
                     ),
+
                     const SizedBox(height: 16),
 
                     // 달력
                     TableCalendar(
-                      focusedDay: viewModel.selectedDay ?? DateTime.now(),
+                      focusedDay: selectedDay,
                       firstDay: DateTime.utc(2020, 1, 1),
                       lastDay: DateTime.utc(2030, 12, 31),
                       headerVisible: false,
                       selectedDayPredicate: (day) {
-                        return isSameDay(
-                          day,
-                          viewModel.selectedDay ?? DateTime.now(),
-                        );
+                        return isSameDay(day, selectedDay);
                       },
                       onDaySelected: (selectedDay, focusedDay) {
                         viewModel.setSelectedDay(selectedDay);
@@ -140,7 +139,7 @@ class HomePage extends StatelessWidget {
                         viewModel.setYear(focusedDay.year);
                         viewModel.setMonth(focusedDay.month);
                       },
-                      calendarStyle: CalendarStyle(
+                      calendarStyle: const CalendarStyle(
                         todayDecoration: BoxDecoration(
                           color: Colors.blue,
                           shape: BoxShape.circle,
@@ -156,16 +155,18 @@ class HomePage extends StatelessWidget {
 
                     // 지출 내역 없음
                     viewModel.transactions.isNotEmpty
-                        ? Column(
-                            children: viewModel.transactions
-                                .map(
-                                  (tx) => _buildExpenseItem(
-                                    tx.amount,
-                                    tx.category,
-                                    tx.date ?? DateTime.now(),
-                                  ),
-                                )
-                                .toList(),
+                        ? Expanded(
+                            child: ListView.builder(
+                              itemCount: viewModel.transactions.length,
+                              itemBuilder: (context, index) {
+                                final tx = viewModel.transactions[index];
+                                return _buildExpenseItem(
+                                  tx['amount'] as int,
+                                  tx['category'] as String,
+                                  tx['date'] as DateTime,
+                                );
+                              },
+                            ),
                           )
                         : const Center(
                             child: Text(
@@ -185,9 +186,7 @@ class HomePage extends StatelessWidget {
                 final result = await Navigator.push<Map<String, dynamic>?>(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => AddPage(
-                      initialDate: viewModel.selectedDay ?? DateTime.now(),
-                    ),
+                    builder: (context) => AddPage(initialDate: selectedDay),
                   ),
                 );
 
@@ -221,14 +220,31 @@ class HomePage extends StatelessWidget {
                       ? (categoryDynamic['name'] ?? '')
                       : '';
 
+                  final dynamic dateDynamic = result['date'];
+                  DateTime date = selectedDay;
+                  if (dateDynamic is DateTime) {
+                    date = dateDynamic;
+                  } else if (dateDynamic is String) {
+                    try {
+                      date = DateTime.parse(dateDynamic);
+                    } catch (_) {}
+                  }
+
                   debugPrint('Parsed Title: $title');
                   debugPrint('Parsed Amount: $amount');
                   debugPrint('Parsed Category: $category');
+                  debugPrint('Parsed Date: $date');
 
                   final safeTitle = title.isNotEmpty ? title : '제목 없음';
                   final safeCategory = category.isNotEmpty ? category : '기타';
 
-                  viewModel.addTransaction(safeTitle, amount, safeCategory);
+                  viewModel.setSelectedDay(date);
+                  viewModel.addTransaction(
+                    safeTitle,
+                    amount,
+                    safeCategory,
+                    date,
+                  );
                 }
               },
               backgroundColor: Colors.blue,

@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 class AddPage extends StatefulWidget {
   final DateTime initialDate;
 
-  const AddPage({Key? key, required this.initialDate}) : super(key: key);
+  const AddPage({super.key, required this.initialDate});
 
   @override
   _AddPageState createState() => _AddPageState();

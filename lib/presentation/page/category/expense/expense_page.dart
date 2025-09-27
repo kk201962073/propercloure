@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:propercloure/presentation/page/home/home_page.dart';
 
 class ExpensePage extends StatelessWidget {
   final int amount;
@@ -29,7 +28,7 @@ class ExpensePage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('${amount.toString()}'),
+        title: Text(amount.toString()),
         actions: [
           IconButton(
             icon: const Icon(Icons.close),

@@ -1,25 +1,11 @@
 import 'package:flutter/material.dart';
 
-class TransactionModel {
-  final String title;
-  final int amount;
-  final String category;
-
-  TransactionModel({
-    required this.title,
-    required this.amount,
-    required this.category,
-  });
-
-  DateTime? get date => null;
-}
-
 class HomeViewModel extends ChangeNotifier {
   DateTime _selectedDay = DateTime.now();
   int _selectedMonth = DateTime.now().month;
   int _selectedYear = DateTime.now().year;
 
-  List<TransactionModel> transactions = [];
+  List<Map<String, dynamic>> transactions = [];
 
   DateTime get selectedDay => _selectedDay;
   int get selectedMonth => _selectedMonth;
@@ -51,20 +37,38 @@ class HomeViewModel extends ChangeNotifier {
     return List.generate(11, (index) => currentYear - 5 + index);
   }
 
-  void addTransaction(String title, int amount, String category) {
-    transactions.add(
-      TransactionModel(title: title, amount: amount, category: category),
-    );
+  void addTransaction(
+    String title,
+    int amount,
+    String category,
+    DateTime date,
+  ) {
+    transactions.add({
+      'title': title,
+      'amount': amount,
+      'category': category,
+      'date': date,
+    });
     notifyListeners();
   }
 
+  void updateTransaction(int index, Map<String, dynamic> newTransaction) {
+    if (index >= 0 && index < transactions.length) {
+      transactions[index] = newTransaction;
+      notifyListeners();
+    }
+  }
+
   int get totalIncome => transactions
-      .where((tx) => tx.amount > 0)
-      .fold(0, (sum, tx) => sum + tx.amount);
+      .where((tx) => tx['amount'] is int && tx['amount'] > 0)
+      .fold(0, (sum, tx) => sum + (tx['amount'] as int));
 
   int get totalExpense => transactions
-      .where((tx) => tx.amount < 0)
-      .fold(0, (sum, tx) => sum + tx.amount.abs());
+      .where((tx) => tx['amount'] is int && tx['amount'] < 0)
+      .fold(0, (sum, tx) => sum + (tx['amount'] as int).abs());
 
-  int get totalBalance => transactions.fold(0, (sum, tx) => sum + tx.amount);
+  int get totalBalance => transactions.fold(
+    0,
+    (sum, tx) => sum + (tx['amount'] is int ? (tx['amount'] as int) : 0),
+  );
 }

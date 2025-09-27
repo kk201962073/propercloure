@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:propercloure/presentation/page/home/home_page.dart';
 
 class DepositPage extends StatefulWidget {
   final int amount;
