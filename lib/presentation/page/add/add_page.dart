@@ -33,7 +33,6 @@ class _AddPageState extends State<AddPage> {
       create: (_) => AddViewModel(widget.initialDate),
       child: Consumer<AddViewModel>(
         builder: (context, viewModel, child) {
-          // Update controller text only if different to avoid cursor jump
           final newText = viewModel.amountRight.toString();
           if (_controller.text != newText) {
             _controller.text = newText;
@@ -162,11 +161,13 @@ class _AddPageState extends State<AddPage> {
                               Navigator.pop(context, {
                                 'amount': viewModel.amountRight.abs(),
                                 'category': category,
+                                'date': viewModel.selectedDate,
                               });
                             } else {
                               Navigator.pop(context, {
                                 'amount': viewModel.amountRight.abs(),
                                 'category': '',
+                                'date': viewModel.selectedDate,
                               });
                             }
                           },
@@ -215,11 +216,13 @@ class _AddPageState extends State<AddPage> {
                               Navigator.pop(context, {
                                 'amount': -viewModel.amountRight.abs(),
                                 'category': category,
+                                'date': viewModel.selectedDate,
                               });
                             } else {
                               Navigator.pop(context, {
                                 'amount': -viewModel.amountRight.abs(),
                                 'category': '',
+                                'date': viewModel.selectedDate,
                               });
                             }
                           },

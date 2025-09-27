@@ -4,71 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:propercloure/presentation/page/Home/home_view_model.dart';
 
-class TransactionModel {
-  final String title;
-  final int amount;
-  final String category;
-
-  TransactionModel({
-    required this.title,
-    required this.amount,
-    required this.category,
-  });
-}
-
-class HomeViewModel extends ChangeNotifier {
-  List<TransactionModel> transactions = [];
-
-  int selectedYear = DateTime.now().year;
-  int selectedMonth = DateTime.now().month;
-  DateTime selectedDay = DateTime.now();
-
-  List<int> get allYears {
-    final currentYear = DateTime.now().year;
-    return List.generate(11, (index) => currentYear - 5 + index);
-  }
-
-  List<int> get allMonths => List.generate(12, (index) => index + 1);
-
-  void setYear(int year) {
-    selectedYear = year;
-    notifyListeners();
-  }
-
-  void setMonth(int month) {
-    selectedMonth = month;
-    notifyListeners();
-  }
-
-  void setSelectedDay(DateTime day) {
-    selectedDay = day;
-    notifyListeners();
-  }
-
-  void addTransaction(String title, int amount, String category) {
-    transactions.add(
-      TransactionModel(title: title, amount: amount, category: category),
-    );
-    notifyListeners();
-  }
-
-  int get totalIncome {
-    return transactions
-        .where((tx) => tx.amount > 0)
-        .fold(0, (sum, tx) => sum + tx.amount);
-  }
-
-  int get totalExpense {
-    return transactions
-        .where((tx) => tx.amount < 0)
-        .fold(0, (sum, tx) => sum + tx.amount.abs());
-  }
-
-  int get totalBalance {
-    return transactions.fold(0, (sum, tx) => sum + tx.amount);
-  }
-}
-
 class HomePage extends StatelessWidget {
   final bool hasExpense;
   const HomePage({super.key, this.hasExpense = false});
@@ -188,12 +123,15 @@ class HomePage extends StatelessWidget {
 
                     // 달력
                     TableCalendar(
-                      focusedDay: viewModel.selectedDay,
+                      focusedDay: viewModel.selectedDay ?? DateTime.now(),
                       firstDay: DateTime.utc(2020, 1, 1),
                       lastDay: DateTime.utc(2030, 12, 31),
                       headerVisible: false,
                       selectedDayPredicate: (day) {
-                        return isSameDay(day, viewModel.selectedDay);
+                        return isSameDay(
+                          day,
+                          viewModel.selectedDay ?? DateTime.now(),
+                        );
                       },
                       onDaySelected: (selectedDay, focusedDay) {
                         viewModel.setSelectedDay(selectedDay);
@@ -221,8 +159,11 @@ class HomePage extends StatelessWidget {
                         ? Column(
                             children: viewModel.transactions
                                 .map(
-                                  (tx) =>
-                                      _buildExpenseItem(tx.amount, tx.category),
+                                  (tx) => _buildExpenseItem(
+                                    tx.amount,
+                                    tx.category,
+                                    tx.date ?? DateTime.now(),
+                                  ),
                                 )
                                 .toList(),
                           )
@@ -241,23 +182,28 @@ class HomePage extends StatelessWidget {
             floatingActionButton: FloatingActionButton(
               onPressed: () async {
                 debugPrint('Navigating to AddPage...');
-                final result = await Navigator.push(
+                final result = await Navigator.push<Map<String, dynamic>?>(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                        AddPage(initialDate: viewModel.selectedDay),
+                    builder: (context) => AddPage(
+                      initialDate: viewModel.selectedDay ?? DateTime.now(),
+                    ),
                   ),
                 );
-                debugPrint('Returned from AddPage with result: $result');
+
                 if (!context.mounted) return;
-                if (result != null && result is Map<String, dynamic>) {
+
+                debugPrint('Returned from AddPage with result: $result');
+
+                if (result != null) {
                   debugPrint('Result keys: ${result.keys}');
                   debugPrint('Result values: $result');
+
                   final dynamic titleDynamic = result['title'];
                   final String title = titleDynamic is String
                       ? titleDynamic
                       : titleDynamic is Map
-                      ? titleDynamic['name'] ?? ''
+                      ? (titleDynamic['name'] ?? '')
                       : '';
 
                   final dynamic amountDynamic = result['amount'];
@@ -272,7 +218,7 @@ class HomePage extends StatelessWidget {
                   final String category = categoryDynamic is String
                       ? categoryDynamic
                       : categoryDynamic is Map
-                      ? categoryDynamic['name'] ?? ''
+                      ? (categoryDynamic['name'] ?? '')
                       : '';
 
                   debugPrint('Parsed Title: $title');
@@ -326,7 +272,7 @@ class HomePage extends StatelessWidget {
   }
 }
 
-Widget _buildExpenseItem(int amount, String category) {
+Widget _buildExpenseItem(int amount, String category, DateTime date) {
   final isIncome = amount > 0;
   return Padding(
     padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -334,10 +280,19 @@ Widget _buildExpenseItem(int amount, String category) {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(
-          child: Text(
-            category,
-            style: const TextStyle(fontSize: 14),
-            overflow: TextOverflow.ellipsis,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                category,
+                style: const TextStyle(fontSize: 14),
+                overflow: TextOverflow.ellipsis,
+              ),
+              Text(
+                "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}",
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+            ],
           ),
         ),
         Text(
