@@ -52,21 +52,59 @@ class AddPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Row(
-                    children: const [
-                      Text(
+                    children: [
+                      const Text(
                         '₩',
                         style: TextStyle(
                           fontSize: 50,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      Spacer(),
-                      Text(
-                        '0',
-                        style: TextStyle(
-                          fontSize: 50,
-                          color: Colors.blue,
-                          fontWeight: FontWeight.w500,
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            return SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              reverse: true,
+                              child: SizedBox(
+                                width: constraints.maxWidth,
+                                height: 60,
+                                child: TextField(
+                                  controller:
+                                      TextEditingController(
+                                          text: viewModel.amountRight
+                                              .toString(),
+                                        )
+                                        ..selection =
+                                            TextSelection.fromPosition(
+                                              TextPosition(
+                                                offset: viewModel.amountRight
+                                                    .toString()
+                                                    .length,
+                                              ),
+                                            ),
+                                  keyboardType: TextInputType.number,
+                                  textAlign: TextAlign.right,
+                                  maxLines: 1,
+                                  style: const TextStyle(
+                                    fontSize: 50,
+                                    color: Colors.blue,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  decoration: const InputDecoration(
+                                    border: InputBorder.none,
+                                    isDense: true,
+                                    contentPadding: EdgeInsets.zero,
+                                  ),
+                                  onChanged: (value) {
+                                    final parsed = int.tryParse(value) ?? 0;
+                                    viewModel.amountRight = parsed;
+                                  },
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ],
