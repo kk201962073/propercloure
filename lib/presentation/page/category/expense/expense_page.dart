@@ -55,10 +55,14 @@ class ExpensePage extends StatelessWidget {
         final category = categories[index];
         return InkWell(
           onTap: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const HomePage()),
+            print(
+              'Category selected: ${category['label']}, Amount: $amount, Date: $selectedDate',
             );
+            Navigator.pop(context, <String, dynamic>{
+              'category': category['label'],
+              'amount': amount,
+              'date': selectedDate,
+            });
           },
           child: Column(
             children: [

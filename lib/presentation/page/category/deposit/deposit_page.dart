@@ -53,10 +53,11 @@ class _DepositPageState extends State<DepositPage> {
         final category = categories[index];
         return InkWell(
           onTap: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const HomePage()),
-            );
+            Navigator.pop(context, {
+              'amount': widget.amount,
+              'selectedDate': widget.selectedDate,
+              'category': category['label'],
+            });
           },
           child: Column(
             children: [

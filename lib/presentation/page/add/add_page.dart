@@ -1,19 +1,47 @@
+import 'package:flutter/material.dart';
 import 'package:propercloure/presentation/page/category/deposit/deposit_page.dart';
 import 'package:propercloure/presentation/page/category/expense/expense_page.dart';
-import 'package:flutter/material.dart';
 import 'package:propercloure/presentation/page/add/add_view_model.dart';
 import 'package:provider/provider.dart';
 
-class AddPage extends StatelessWidget {
+class AddPage extends StatefulWidget {
   final DateTime initialDate;
   const AddPage({super.key, required this.initialDate});
 
   @override
+  State<AddPage> createState() => _AddPageState();
+}
+
+class _AddPageState extends State<AddPage> {
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => AddViewModel(initialDate),
+      create: (_) => AddViewModel(widget.initialDate),
       child: Consumer<AddViewModel>(
         builder: (context, viewModel, child) {
+          // Update controller text only if different to avoid cursor jump
+          final newText = viewModel.amountRight.toString();
+          if (_controller.text != newText) {
+            _controller.text = newText;
+            _controller.selection = TextSelection.fromPosition(
+              TextPosition(offset: _controller.text.length),
+            );
+          }
+
           return Scaffold(
             appBar: AppBar(
               title: const Text('등록'),
@@ -41,7 +69,11 @@ class AddPage extends StatelessWidget {
                         lastDate: DateTime(2100),
                       );
                       if (picked != null && picked != viewModel.selectedDate) {
+                        print('Date picked: $picked');
                         viewModel.setDate(picked);
+                        print(
+                          'Date updated in viewModel: ${viewModel.selectedDate}',
+                        );
                       }
                     },
                     child: Text(
@@ -67,17 +99,7 @@ class AddPage extends StatelessWidget {
                         child: SizedBox(
                           height: 60,
                           child: TextField(
-                            controller:
-                                TextEditingController(
-                                    text: viewModel.amountRight.toString(),
-                                  )
-                                  ..selection = TextSelection.fromPosition(
-                                    TextPosition(
-                                      offset: viewModel.amountRight
-                                          .toString()
-                                          .length,
-                                    ),
-                                  ),
+                            controller: _controller,
                             keyboardType: TextInputType.number,
                             textAlign: TextAlign.right,
                             maxLines: 1,
@@ -94,6 +116,9 @@ class AddPage extends StatelessWidget {
                             onChanged: (value) {
                               final parsed = int.tryParse(value) ?? 0;
                               viewModel.amountRight = parsed;
+                              print(
+                                'TextField changed: value=$value, amountRight=${viewModel.amountRight}',
+                              );
                             },
                           ),
                         ),
@@ -113,6 +138,9 @@ class AddPage extends StatelessWidget {
                             ),
                           ),
                           onPressed: () async {
+                            print('Deposit button pressed:');
+                            print('amountRight: ${viewModel.amountRight}');
+                            print('selectedDate: ${viewModel.selectedDate}');
                             final result = await Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -122,10 +150,23 @@ class AddPage extends StatelessWidget {
                                 ),
                               ),
                             );
+                            print('result: $result');
+                            String category = '';
                             if (result != null) {
+                              if (result is String) {
+                                category = result;
+                              } else if (result is Map &&
+                                  result['category'] is String) {
+                                category = result['category'];
+                              }
                               Navigator.pop(context, {
-                                'amount': viewModel.amountRight,
-                                'category': result,
+                                'amount': viewModel.amountRight.abs(),
+                                'category': category,
+                              });
+                            } else {
+                              Navigator.pop(context, {
+                                'amount': viewModel.amountRight.abs(),
+                                'category': '',
                               });
                             }
                           },
@@ -150,6 +191,9 @@ class AddPage extends StatelessWidget {
                             ),
                           ),
                           onPressed: () async {
+                            print('Expense button pressed:');
+                            print('amountRight: ${viewModel.amountRight}');
+                            print('selectedDate: ${viewModel.selectedDate}');
                             final result = await Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -159,10 +203,23 @@ class AddPage extends StatelessWidget {
                                 ),
                               ),
                             );
+                            print('result: $result');
+                            String category = '';
                             if (result != null) {
+                              if (result is String) {
+                                category = result;
+                              } else if (result is Map &&
+                                  result['category'] is String) {
+                                category = result['category'];
+                              }
                               Navigator.pop(context, {
-                                'amount': viewModel.amountRight,
-                                'category': result,
+                                'amount': -viewModel.amountRight.abs(),
+                                'category': category,
+                              });
+                            } else {
+                              Navigator.pop(context, {
+                                'amount': -viewModel.amountRight.abs(),
+                                'category': '',
                               });
                             }
                           },

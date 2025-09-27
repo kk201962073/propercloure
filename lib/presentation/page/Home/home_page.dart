@@ -1,8 +1,72 @@
 import 'package:flutter/material.dart';
 import 'package:propercloure/presentation/page/add/add_page.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:propercloure/presentation/page/Home/hone_view_model.dart';
 import 'package:provider/provider.dart';
+
+class Transaction {
+  final String title;
+  final int amount;
+  final String category;
+
+  Transaction({
+    required this.title,
+    required this.amount,
+    required this.category,
+  });
+}
+
+class HomeViewModel extends ChangeNotifier {
+  List<Transaction> transactions = [];
+
+  int selectedYear = DateTime.now().year;
+  int selectedMonth = DateTime.now().month;
+  DateTime selectedDay = DateTime.now();
+
+  List<int> get allYears {
+    final currentYear = DateTime.now().year;
+    return List.generate(11, (index) => currentYear - 5 + index);
+  }
+
+  List<int> get allMonths => List.generate(12, (index) => index + 1);
+
+  void setYear(int year) {
+    selectedYear = year;
+    notifyListeners();
+  }
+
+  void setMonth(int month) {
+    selectedMonth = month;
+    notifyListeners();
+  }
+
+  void setSelectedDay(DateTime day) {
+    selectedDay = day;
+    notifyListeners();
+  }
+
+  void addTransaction(String title, int amount, String category) {
+    transactions.add(
+      Transaction(title: title, amount: amount, category: category),
+    );
+    notifyListeners();
+  }
+
+  int get totalIncome {
+    return transactions
+        .where((tx) => tx.amount > 0)
+        .fold(0, (sum, tx) => sum + tx.amount);
+  }
+
+  int get totalExpense {
+    return transactions
+        .where((tx) => tx.amount < 0)
+        .fold(0, (sum, tx) => sum + tx.amount.abs());
+  }
+
+  int get totalBalance {
+    return transactions.fold(0, (sum, tx) => sum + tx.amount);
+  }
+}
 
 class HomePage extends StatelessWidget {
   final bool hasExpense;
@@ -86,9 +150,9 @@ class HomePage extends StatelessWidget {
                             ],
                           ),
                         ),
-                        const Text(
-                          "총 합계 0",
-                          style: TextStyle(
+                        Text(
+                          "총 합계 ${viewModel.totalBalance}",
+                          style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                           ),
@@ -99,19 +163,19 @@ class HomePage extends StatelessWidget {
 
                     // 수입 / 지출
                     Row(
-                      children: const [
+                      children: [
                         Text(
-                          "수입 0",
-                          style: TextStyle(
+                          "수입 +${viewModel.totalIncome}",
+                          style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                             color: Colors.blue,
                           ),
                         ),
-                        SizedBox(width: 20),
+                        const SizedBox(width: 20),
                         Text(
-                          "지출 0",
-                          style: TextStyle(
+                          "지출 -${viewModel.totalExpense}",
+                          style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                             color: Colors.red,
@@ -152,13 +216,14 @@ class HomePage extends StatelessWidget {
                     const SizedBox(height: 50),
 
                     // 지출 내역 없음
-                    hasExpense
+                    viewModel.transactions.isNotEmpty
                         ? Column(
-                            children: [
-                              _buildExpenseItem("월급", 10000),
-                              _buildExpenseItem("CU 편의점", -2700),
-                              _buildExpenseItem("메아커피", -3000),
-                            ],
+                            children: viewModel.transactions
+                                .map(
+                                  (tx) =>
+                                      _buildExpenseItem(tx.amount, tx.category),
+                                )
+                                .toList(),
                           )
                         : const Center(
                             child: Text(
@@ -173,14 +238,54 @@ class HomePage extends StatelessWidget {
 
             // 플로팅 버튼
             floatingActionButton: FloatingActionButton(
-              onPressed: () {
-                Navigator.push(
+              onPressed: () async {
+                debugPrint('Navigating to AddPage...');
+                final result = await Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) =>
                         AddPage(initialDate: viewModel.selectedDay),
                   ),
                 );
+                debugPrint('Returned from AddPage with result: $result');
+                if (!context.mounted) return;
+                if (result != null && result is Map<String, dynamic>) {
+                  debugPrint('Result keys: ${result.keys}');
+                  debugPrint('Result values: $result');
+                  final dynamic titleDynamic = result['title'];
+                  final String title = titleDynamic is String
+                      ? titleDynamic
+                      : titleDynamic is Map
+                      ? titleDynamic['name'] ?? ''
+                      : '';
+
+                  final dynamic amountDynamic = result['amount'];
+                  int amount = 0;
+                  if (amountDynamic is int) {
+                    amount = amountDynamic;
+                  } else if (amountDynamic is String) {
+                    amount = int.tryParse(amountDynamic) ?? 0;
+                  }
+
+                  // Respect the sign of the amount as is (positive or negative)
+                  // No forced absolute value
+
+                  final dynamic categoryDynamic = result['category'];
+                  final String category = categoryDynamic is String
+                      ? categoryDynamic
+                      : categoryDynamic is Map
+                      ? categoryDynamic['name'] ?? ''
+                      : '';
+
+                  debugPrint('Parsed Title: $title');
+                  debugPrint('Parsed Amount: $amount');
+                  debugPrint('Parsed Category: $category');
+
+                  final safeTitle = title.isNotEmpty ? title : '제목 없음';
+                  final safeCategory = category.isNotEmpty ? category : '기타';
+
+                  viewModel.addTransaction(safeTitle, amount, safeCategory);
+                }
               },
               backgroundColor: Colors.blue,
               child: const Icon(Icons.add, color: Colors.white),
@@ -223,16 +328,22 @@ class HomePage extends StatelessWidget {
   }
 }
 
-Widget _buildExpenseItem(String title, int amount) {
+Widget _buildExpenseItem(int amount, String category) {
   final isIncome = amount > 0;
   return Padding(
     padding: const EdgeInsets.symmetric(vertical: 4.0),
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(title, style: const TextStyle(fontSize: 14)),
+        Expanded(
+          child: Text(
+            category,
+            style: const TextStyle(fontSize: 14),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
         Text(
-          "${isIncome ? '+' : ''}$amount",
+          "$amount",
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
