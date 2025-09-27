@@ -64,49 +64,38 @@ class AddPage extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: LayoutBuilder(
-                          builder: (context, constraints) {
-                            return SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              reverse: true,
-                              child: SizedBox(
-                                width: constraints.maxWidth,
-                                height: 60,
-                                child: TextField(
-                                  controller:
-                                      TextEditingController(
-                                          text: viewModel.amountRight
-                                              .toString(),
-                                        )
-                                        ..selection =
-                                            TextSelection.fromPosition(
-                                              TextPosition(
-                                                offset: viewModel.amountRight
-                                                    .toString()
-                                                    .length,
-                                              ),
-                                            ),
-                                  keyboardType: TextInputType.number,
-                                  textAlign: TextAlign.right,
-                                  maxLines: 1,
-                                  style: const TextStyle(
-                                    fontSize: 50,
-                                    color: Colors.blue,
-                                    fontWeight: FontWeight.w500,
+                        child: SizedBox(
+                          height: 60,
+                          child: TextField(
+                            controller:
+                                TextEditingController(
+                                    text: viewModel.amountRight.toString(),
+                                  )
+                                  ..selection = TextSelection.fromPosition(
+                                    TextPosition(
+                                      offset: viewModel.amountRight
+                                          .toString()
+                                          .length,
+                                    ),
                                   ),
-                                  decoration: const InputDecoration(
-                                    border: InputBorder.none,
-                                    isDense: true,
-                                    contentPadding: EdgeInsets.zero,
-                                  ),
-                                  onChanged: (value) {
-                                    final parsed = int.tryParse(value) ?? 0;
-                                    viewModel.amountRight = parsed;
-                                  },
-                                ),
-                              ),
-                            );
-                          },
+                            keyboardType: TextInputType.number,
+                            textAlign: TextAlign.right,
+                            maxLines: 1,
+                            style: const TextStyle(
+                              fontSize: 50,
+                              color: Colors.blue,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              isDense: true,
+                              contentPadding: EdgeInsets.zero,
+                            ),
+                            onChanged: (value) {
+                              final parsed = int.tryParse(value) ?? 0;
+                              viewModel.amountRight = parsed;
+                            },
+                          ),
                         ),
                       ),
                     ],
@@ -123,13 +112,22 @@ class AddPage extends StatelessWidget {
                               borderRadius: BorderRadius.zero,
                             ),
                           ),
-                          onPressed: () {
-                            Navigator.push(
+                          onPressed: () async {
+                            final result = await Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => DepositPage(),
+                                builder: (context) => DepositPage(
+                                  amount: viewModel.amountRight,
+                                  selectedDate: viewModel.selectedDate,
+                                ),
                               ),
                             );
+                            if (result != null) {
+                              Navigator.pop(context, {
+                                'amount': viewModel.amountRight,
+                                'category': result,
+                              });
+                            }
                           },
                           child: const Text(
                             "입금",
@@ -151,13 +149,22 @@ class AddPage extends StatelessWidget {
                               borderRadius: BorderRadius.zero,
                             ),
                           ),
-                          onPressed: () {
-                            Navigator.push(
+                          onPressed: () async {
+                            final result = await Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => ExpensePage(),
+                                builder: (context) => ExpensePage(
+                                  amount: viewModel.amountRight,
+                                  selectedDate: viewModel.selectedDate,
+                                ),
                               ),
                             );
+                            if (result != null) {
+                              Navigator.pop(context, {
+                                'amount': viewModel.amountRight,
+                                'category': result,
+                              });
+                            }
                           },
                           child: const Text(
                             "지출",

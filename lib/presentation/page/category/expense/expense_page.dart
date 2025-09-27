@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:propercloure/presentation/page/home/home_page.dart';
 
 class ExpensePage extends StatelessWidget {
-  const ExpensePage({super.key});
+  final int amount;
+  final DateTime selectedDate;
+
+  const ExpensePage({
+    super.key,
+    required this.amount,
+    required this.selectedDate,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +29,7 @@ class ExpensePage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("0원"),
+        title: Text('${amount.toString()}'),
         actions: [
           IconButton(
             icon: const Icon(Icons.close),
@@ -45,16 +53,24 @@ class ExpensePage extends StatelessWidget {
       ),
       itemBuilder: (context, index) {
         final category = categories[index];
-        return Column(
-          children: [
-            SizedBox(
-              height: 48,
-              width: 48,
-              child: Image.asset(category['image'], fit: BoxFit.contain),
-            ),
-            const SizedBox(height: 8),
-            Text(category['label']),
-          ],
+        return InkWell(
+          onTap: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HomePage()),
+            );
+          },
+          child: Column(
+            children: [
+              SizedBox(
+                height: 48,
+                width: 48,
+                child: Image.asset(category['image'], fit: BoxFit.contain),
+              ),
+              const SizedBox(height: 8),
+              Text(category['label']),
+            ],
+          ),
         );
       },
     );
