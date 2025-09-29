@@ -57,6 +57,12 @@
 					<string>com.googleusercontent.apps.936609146155-nc7djjvl228bseumccankjs1ljnsf035</string>
 				</array>
 			</dict>
+			<dict>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>com.yourcompany.properclosure</string>
+				</array>
+			</dict>
 		</array>
 	</dict>
 </plist>
