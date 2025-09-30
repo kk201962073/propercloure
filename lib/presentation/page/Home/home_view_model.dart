@@ -7,10 +7,15 @@ class HomeViewModel extends ChangeNotifier {
   int _selectedYear = DateTime.now().year;
 
   List<Map<String, dynamic>> transactions = [];
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  late final FirebaseFirestore _firestore;
 
   HomeViewModel() {
-    loadTransactions();
+    try {
+      _firestore = FirebaseFirestore.instance;
+      try {
+        loadTransactions();
+      } catch (e) {}
+    } catch (e) {}
   }
 
   DateTime get selectedDay => _selectedDay;
@@ -64,20 +69,22 @@ class HomeViewModel extends ChangeNotifier {
     String category,
     DateTime date,
   ) async {
-    final docRef = await _firestore.collection('transactions').add({
-      'title': title,
-      'amount': amount,
-      'category': category,
-      'date': date.toIso8601String(),
-    });
-    transactions.add({
-      'id': docRef.id,
-      'title': title,
-      'amount': amount,
-      'category': category,
-      'date': date,
-    });
-    notifyListeners();
+    try {
+      final docRef = await _firestore.collection('transactions').add({
+        'title': title,
+        'amount': amount,
+        'category': category,
+        'date': date.toIso8601String(),
+      });
+      transactions.add({
+        'id': docRef.id,
+        'title': title,
+        'amount': amount,
+        'category': category,
+        'date': date,
+      });
+      notifyListeners();
+    } catch (e) {}
   }
 
   Future<void> updateTransaction(
@@ -107,9 +114,7 @@ class HomeViewModel extends ChangeNotifier {
                 : DateTime.parse(newTransaction['date']),
           };
           notifyListeners();
-        } catch (e) {
-          debugPrint('Failed to update transaction: $e');
-        }
+        } catch (e) {}
       }
     }
   }

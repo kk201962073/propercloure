@@ -154,9 +154,9 @@ class HomePage extends StatelessWidget {
 
                     const SizedBox(height: 50),
 
-                    // 지출 내역 - Firestore StreamBuilder
+                    // 지출 내역 - Firestore StreamBuilder (실시간 반영)
                     Expanded(
-                      child: StreamBuilder(
+                      child: StreamBuilder<QuerySnapshot>(
                         stream: FirebaseFirestore.instance
                             .collection('transactions')
                             .snapshots(),
@@ -176,8 +176,8 @@ class HomePage extends StatelessWidget {
                               ),
                             );
                           }
-                          // Convert documents to transaction maps, parse date field
                           final docs = snapshot.data!.docs;
+                          // Parse date safely, sort by date
                           final List<Map<String, dynamic>> sortedTransactions =
                               docs.map<Map<String, dynamic>>((doc) {
                                 final data = doc.data() as Map<String, dynamic>;
