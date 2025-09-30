@@ -205,9 +205,17 @@ class HomePage extends StatelessWidget {
                             itemBuilder: (context, index) {
                               final tx = sortedTransactions[index];
                               final DateTime txDate = tx['date'] as DateTime;
+                              final int amount = (tx['amount'] is int)
+                                  ? tx['amount'] as int
+                                  : int.tryParse(
+                                          tx['amount']?.toString() ?? '0',
+                                        ) ??
+                                        0;
+                              final String category =
+                                  tx['category']?.toString() ?? '기타';
                               return _buildExpenseItem(
-                                tx['amount'] as int,
-                                tx['category'] as String,
+                                amount,
+                                category,
                                 txDate,
                               );
                             },

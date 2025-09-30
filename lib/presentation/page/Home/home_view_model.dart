@@ -54,10 +54,12 @@ class HomeViewModel extends ChangeNotifier {
       final data = doc.data();
       return {
         'id': doc.id,
-        'title': data['title'],
-        'amount': data['amount'],
-        'category': data['category'],
-        'date': DateTime.parse(data['date']),
+        'title': data['title'] ?? '',
+        'amount': data['amount'] ?? 0,
+        'category': data['category'] ?? '',
+        'date': data['date'] != null
+            ? DateTime.tryParse(data['date'].toString()) ?? DateTime.now()
+            : DateTime.now(),
       };
     }).toList();
     notifyListeners();
@@ -102,7 +104,8 @@ class HomeViewModel extends ChangeNotifier {
             'category': newTransaction['category'],
             'date': (newTransaction['date'] is DateTime)
                 ? (newTransaction['date'] as DateTime).toIso8601String()
-                : newTransaction['date'],
+                : (newTransaction['date']?.toString() ??
+                      DateTime.now().toIso8601String()),
           });
           transactions[index] = {
             'id': docId,
@@ -111,7 +114,10 @@ class HomeViewModel extends ChangeNotifier {
             'category': newTransaction['category'],
             'date': newTransaction['date'] is DateTime
                 ? newTransaction['date']
-                : DateTime.parse(newTransaction['date']),
+                : (newTransaction['date'] != null
+                      ? DateTime.tryParse(newTransaction['date'].toString()) ??
+                            DateTime.now()
+                      : DateTime.now()),
           };
           notifyListeners();
         } catch (e) {}
