@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:propercloure/presentation/page/add/add_page.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -153,27 +154,67 @@ class HomePage extends StatelessWidget {
 
                     const SizedBox(height: 50),
 
-                    // 지출 내역 없음
-                    viewModel.transactions.isNotEmpty
-                        ? Expanded(
-                            child: ListView.builder(
-                              itemCount: viewModel.transactions.length,
-                              itemBuilder: (context, index) {
-                                final tx = viewModel.transactions[index];
-                                return _buildExpenseItem(
-                                  tx['amount'] as int,
-                                  tx['category'] as String,
-                                  tx['date'] as DateTime,
-                                );
-                              },
-                            ),
-                          )
-                        : const Center(
-                            child: Text(
-                              "지출 내역이 없습니다.",
-                              style: TextStyle(fontSize: 16),
-                            ),
-                          ),
+                    // 지출 내역 - Firestore StreamBuilder
+                    Expanded(
+                      child: StreamBuilder(
+                        stream: FirebaseFirestore.instance
+                            .collection('transactions')
+                            .snapshots(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+                          if (!snapshot.hasData ||
+                              snapshot.data!.docs.isEmpty) {
+                            return const Center(
+                              child: Text(
+                                "지출 내역이 없습니다.",
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            );
+                          }
+                          // Convert documents to transaction maps, parse date field
+                          final docs = snapshot.data!.docs;
+                          final List<Map<String, dynamic>> sortedTransactions =
+                              docs.map<Map<String, dynamic>>((doc) {
+                                final data = doc.data() as Map<String, dynamic>;
+                                final dynamic dateRaw = data['date'];
+                                DateTime date;
+                                if (dateRaw is DateTime) {
+                                  date = dateRaw;
+                                } else if (dateRaw is String) {
+                                  try {
+                                    date = DateTime.parse(dateRaw);
+                                  } catch (_) {
+                                    date = DateTime.now();
+                                  }
+                                } else {
+                                  date = DateTime.now();
+                                }
+                                return {...data, 'date': date};
+                              }).toList()..sort(
+                                (a, b) => (a['date'] as DateTime).compareTo(
+                                  b['date'] as DateTime,
+                                ),
+                              );
+                          return ListView.builder(
+                            itemCount: sortedTransactions.length,
+                            itemBuilder: (context, index) {
+                              final tx = sortedTransactions[index];
+                              final DateTime txDate = tx['date'] as DateTime;
+                              return _buildExpenseItem(
+                                tx['amount'] as int,
+                                tx['category'] as String,
+                                txDate,
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -239,7 +280,7 @@ class HomePage extends StatelessWidget {
                   final safeCategory = category.isNotEmpty ? category : '기타';
 
                   viewModel.setSelectedDay(date);
-                  viewModel.addTransaction(
+                  await viewModel.addTransaction(
                     safeTitle,
                     amount,
                     safeCategory,
@@ -253,6 +294,7 @@ class HomePage extends StatelessWidget {
 
             // 하단 네비게이션
             bottomNavigationBar: BottomAppBar(
+              height: 80,
               child: Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
@@ -261,21 +303,58 @@ class HomePage extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    Image.asset(
-                      "assets/image/calender.png",
-                      width: 32,
-                      height: 32,
+                    IconButton(
+                      padding: EdgeInsets.zero,
+                      constraints: BoxConstraints(),
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const HomePage(),
+                          ),
+                        );
+                      },
+                      icon: Image.asset(
+                        "assets/image/calender.png",
+                        width: 64,
+                        height: 64,
+                      ),
                     ),
-                    Image.asset(
-                      "assets/image/money.png",
-                      width: 32,
-                      height: 32,
+                    IconButton(
+                      padding: EdgeInsets.zero,
+                      constraints: BoxConstraints(),
+                      onPressed: () {
+                        debugPrint("가계부 탭 클릭");
+                      },
+                      icon: Image.asset(
+                        "assets/image/money.png",
+                        width: 64,
+                        height: 64,
+                      ),
                     ),
-                    Image.asset("assets/image/ai.png", width: 32, height: 32),
-                    Image.asset(
-                      "assets/image/profile.png",
-                      width: 32,
-                      height: 32,
+                    IconButton(
+                      padding: EdgeInsets.zero,
+                      constraints: BoxConstraints(),
+                      onPressed: () {
+                        debugPrint("AI 탭 클릭");
+                      },
+                      icon: Image.asset(
+                        "assets/image/ai.png",
+                        width: 64,
+                        height: 64,
+                      ),
+                    ),
+                    IconButton(
+                      padding: EdgeInsets.zero,
+                      constraints: BoxConstraints(),
+                      onPressed: () {
+                        debugPrint("프로필 탭 클릭");
+                      },
+                      icon: Image.asset(
+                        "assets/image/profile.png",
+                        width: 64,
+                        height: 64,
+                      ),
                     ),
                   ],
                 ),

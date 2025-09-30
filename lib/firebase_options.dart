@@ -63,8 +63,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '936609146155',
     projectId: 'proercloure',
     storageBucket: 'proercloure.firebasestorage.app',
-    iosClientId: '936609146155-nc7djjvl228bseumccankjs1ljnsf035.apps.googleusercontent.com',
+    iosClientId:
+        '936609146155-nc7djjvl228bseumccankjs1ljnsf035.apps.googleusercontent.com',
     iosBundleId: 'com.example.propercloure',
   );
-
 }
