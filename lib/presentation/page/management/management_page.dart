@@ -6,6 +6,7 @@ class ManagementPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -44,7 +45,13 @@ class ManagementPage extends StatelessWidget {
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   SizedBox(width: 20),
-                  Text("abc123", style: TextStyle(fontSize: 16)),
+                  Flexible(
+                    child: Text(
+                      "abc123",
+                      style: TextStyle(fontSize: 16),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ],
               ),
             ),

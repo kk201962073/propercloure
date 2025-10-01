@@ -27,14 +27,12 @@ class ExpensePage extends StatelessWidget {
     ];
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(amount.toString()),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () => Navigator.pop(context),
-          ),
-        ],
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
       ),
       body: _buildCategoryGrid(expenseCategories),
     );

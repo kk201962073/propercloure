@@ -25,14 +25,12 @@ class _DepositPageState extends State<DepositPage> {
     ];
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
         title: Text("${widget.amount}원"),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () => Navigator.pop(context),
-          ),
-        ],
       ),
       body: _buildCategoryGrid(depositCategories),
     );

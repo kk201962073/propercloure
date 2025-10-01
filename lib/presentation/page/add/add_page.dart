@@ -32,7 +32,11 @@ class _AddPageState extends State<AddPage> {
           }
 
           return Scaffold(
+            backgroundColor: Colors.white,
             appBar: AppBar(
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.black,
+              elevation: 0,
               title: const Text('등록'),
               centerTitle: true,
               actions: [

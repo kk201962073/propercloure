@@ -6,6 +6,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:propercloure/presentation/page/Home/home_view_model.dart';
 import 'package:propercloure/presentation/page/property/propety_page.dart';
 import 'package:propercloure/presentation/page/profile/profile_page.dart';
+import 'package:propercloure/presentation/page/ai/ai_page.dart';
 
 class HomePage extends StatelessWidget {
   final bool hasExpense;
@@ -19,6 +20,7 @@ class HomePage extends StatelessWidget {
         builder: (context, viewModel, _) {
           DateTime selectedDay = viewModel.selectedDay;
           return Scaffold(
+            backgroundColor: Colors.white,
             body: SafeArea(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -302,6 +304,7 @@ class HomePage extends StatelessWidget {
 
             // 하단 네비게이션
             bottomNavigationBar: BottomAppBar(
+              color: Colors.white,
               height: 80,
               child: Padding(
                 padding: const EdgeInsets.symmetric(
@@ -349,7 +352,12 @@ class HomePage extends StatelessWidget {
                       padding: EdgeInsets.zero,
                       constraints: BoxConstraints(),
                       onPressed: () {
-                        debugPrint("AI 탭 클릭");
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const AiPage(),
+                          ),
+                        );
                       },
                       icon: Image.asset(
                         "assets/image/ai.png",

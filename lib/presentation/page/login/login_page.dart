@@ -12,6 +12,7 @@ class LoginPage extends StatelessWidget {
     final appleLoginVM = AppleLoginViewModel(); // Apple 로그인 ViewModel
 
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Center(
           child: Column(
@@ -42,40 +43,44 @@ class LoginPage extends StatelessWidget {
                       );
                     }
                   },
-                  child: Image.asset(
-                    'assets/image/login.png',
-                    width: 183,
-                    height: 183,
+                  child: SizedBox(
+                    width: 250,
+                    height: 50,
+                    child: Image.asset(
+                      'assets/image/login.png',
+                      fit: BoxFit.contain,
+                    ),
                   ),
                 ),
               ),
 
-              // Remove extra spacing and move Apple button up with Transform
-              Transform.translate(
-                offset: const Offset(0, -40),
-                child: Container(
-                  margin: EdgeInsets.zero,
-                  padding: EdgeInsets.zero,
-                  child: GestureDetector(
-                    onTap: () async {
-                      try {
-                        await appleLoginVM.signInWithApple();
-                        // 로그인 성공 → HomePage로 이동
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (_) => const HomePage()),
-                        );
-                      } catch (e) {
-                        // 로그인 실패
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('로그인에 실패했습니다.')),
-                        );
-                      }
-                    },
+              const SizedBox(height: 16),
+
+              Container(
+                margin: EdgeInsets.zero,
+                padding: EdgeInsets.zero,
+                child: GestureDetector(
+                  onTap: () async {
+                    try {
+                      await appleLoginVM.signInWithApple();
+                      // 로그인 성공 → HomePage로 이동
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (_) => const HomePage()),
+                      );
+                    } catch (e) {
+                      // 로그인 실패
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('로그인에 실패했습니다.')),
+                      );
+                    }
+                  },
+                  child: SizedBox(
+                    width: 250,
+                    height: 50,
                     child: Image.asset(
                       'assets/image/applebutton.png',
-                      width: 200,
-                      height: 32,
+                      fit: BoxFit.contain,
                     ),
                   ),
                 ),

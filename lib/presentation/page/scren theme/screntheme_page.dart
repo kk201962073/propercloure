@@ -6,7 +6,14 @@ class ScrenThemePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(leading: BackButton(), title: const Text('화면 테마')),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        leading: BackButton(),
+        title: const Text('화면 테마'),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
