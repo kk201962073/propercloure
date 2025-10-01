@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:propercloure/presentation/page/management/management_page.dart';
 import 'package:propercloure/presentation/page/scren theme/screntheme_page.dart';
+
 import 'package:propercloure/presentation/page/home/home_page.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -85,6 +87,14 @@ class ProfilePage extends StatelessWidget {
                   ListTile(
                     title: const Text("프로필 관리"),
                     trailing: const Text("abc123 >"),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ManagementPage(),
+                        ),
+                      );
+                    },
                   ),
 
                   const SizedBox(height: 50),
