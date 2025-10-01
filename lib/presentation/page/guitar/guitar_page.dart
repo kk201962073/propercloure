@@ -30,7 +30,7 @@ class GuitarPage extends StatelessWidget {
                           const Expanded(
                             child: Center(
                               child: Text(
-                                "지출",
+                                "기타",
                                 style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.w600,
