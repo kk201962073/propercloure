@@ -4,6 +4,8 @@ import 'package:propercloure/presentation/page/add/add_page.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:propercloure/presentation/page/Home/home_view_model.dart';
+import 'package:propercloure/presentation/page/property/propety_page.dart';
+import 'package:propercloure/presentation/page/profile/profile_page.dart';
 
 class HomePage extends StatelessWidget {
   final bool hasExpense;
@@ -89,7 +91,7 @@ class HomePage extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          "총 합계 ${viewModel.totalBalance}",
+                          "총 합계 ${viewModel.monthlyBalance}",
                           style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -98,12 +100,11 @@ class HomePage extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 12),
-
-                    // 수입 / 지출
+                    // 수입 / 지출 (월간)
                     Row(
                       children: [
                         Text(
-                          "수입 +${viewModel.totalIncome}",
+                          "수입 +${viewModel.monthlyIncome}",
                           style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
@@ -112,7 +113,7 @@ class HomePage extends StatelessWidget {
                         ),
                         const SizedBox(width: 20),
                         Text(
-                          "지출 -${viewModel.totalExpense}",
+                          "지출 -${viewModel.monthlyExpense}",
                           style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
@@ -121,7 +122,6 @@ class HomePage extends StatelessWidget {
                         ),
                       ],
                     ),
-
                     const SizedBox(height: 16),
 
                     // 달력
@@ -332,7 +332,12 @@ class HomePage extends StatelessWidget {
                       padding: EdgeInsets.zero,
                       constraints: BoxConstraints(),
                       onPressed: () {
-                        debugPrint("가계부 탭 클릭");
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const PropertyPage(),
+                          ),
+                        );
                       },
                       icon: Image.asset(
                         "assets/image/money.png",
@@ -356,7 +361,12 @@ class HomePage extends StatelessWidget {
                       padding: EdgeInsets.zero,
                       constraints: BoxConstraints(),
                       onPressed: () {
-                        debugPrint("프로필 탭 클릭");
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ProfilePage(),
+                          ),
+                        );
                       },
                       icon: Image.asset(
                         "assets/image/profile.png",

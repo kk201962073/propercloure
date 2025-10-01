@@ -48,21 +48,22 @@ class HomeViewModel extends ChangeNotifier {
     return List.generate(11, (index) => currentYear - 5 + index);
   }
 
-  Future<void> loadTransactions() async {
-    final querySnapshot = await _firestore.collection('transactions').get();
-    transactions = querySnapshot.docs.map<Map<String, dynamic>>((doc) {
-      final data = doc.data();
-      return {
-        'id': doc.id,
-        'title': data['title'] ?? '',
-        'amount': data['amount'] ?? 0,
-        'category': data['category'] ?? '',
-        'date': data['date'] != null
-            ? DateTime.tryParse(data['date'].toString()) ?? DateTime.now()
-            : DateTime.now(),
-      };
-    }).toList();
-    notifyListeners();
+  void loadTransactions() {
+    _firestore.collection('transactions').snapshots().listen((querySnapshot) {
+      transactions = querySnapshot.docs.map<Map<String, dynamic>>((doc) {
+        final data = doc.data();
+        return {
+          'id': doc.id,
+          'title': data['title'] ?? '',
+          'amount': data['amount'] ?? 0,
+          'category': data['category'] ?? '',
+          'date': data['date'] != null
+              ? DateTime.tryParse(data['date'].toString()) ?? DateTime.now()
+              : DateTime.now(),
+        };
+      }).toList();
+      notifyListeners();
+    });
   }
 
   Future<void> addTransaction(
@@ -137,4 +138,46 @@ class HomeViewModel extends ChangeNotifier {
     0,
     (sum, tx) => sum + (tx['amount'] is int ? (tx['amount'] as int) : 0),
   );
+
+  // 월별 데이터 필터링
+  List<Map<String, dynamic>> get monthlyTransactions {
+    return transactions.where((tx) {
+      final date = tx['date'] as DateTime;
+      return date.year == _selectedYear && date.month == _selectedMonth;
+    }).toList();
+  }
+
+  // 일별 데이터 필터링
+  List<Map<String, dynamic>> get dailyTransactions {
+    return transactions.where((tx) {
+      final date = tx['date'] as DateTime;
+      return date.year == _selectedDay.year &&
+          date.month == _selectedDay.month &&
+          date.day == _selectedDay.day;
+    }).toList();
+  }
+
+  // 월별 합계
+  int get monthlyIncome => monthlyTransactions
+      .where((tx) => tx['amount'] > 0)
+      .fold(0, (sum, tx) => sum + (tx['amount'] as int));
+
+  int get monthlyExpense => monthlyTransactions
+      .where((tx) => tx['amount'] < 0)
+      .fold(0, (sum, tx) => sum + (tx['amount'] as int).abs());
+
+  int get monthlyBalance =>
+      monthlyTransactions.fold(0, (sum, tx) => sum + (tx['amount'] as int));
+
+  // 일별 합계
+  int get dailyIncome => dailyTransactions
+      .where((tx) => tx['amount'] > 0)
+      .fold(0, (sum, tx) => sum + (tx['amount'] as int));
+
+  int get dailyExpense => dailyTransactions
+      .where((tx) => tx['amount'] < 0)
+      .fold(0, (sum, tx) => sum + (tx['amount'] as int).abs());
+
+  int get dailyBalance =>
+      dailyTransactions.fold(0, (sum, tx) => sum + (tx['amount'] as int));
 }
