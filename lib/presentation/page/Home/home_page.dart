@@ -137,7 +137,7 @@ class _HomePageState extends State<HomePage> {
                                         date = DateTime.now();
                                       }
                                     } else if (dateRaw is Timestamp) {
-                                      date = (dateRaw as Timestamp).toDate();
+                                      date = dateRaw.toDate();
                                     } else {
                                       date = DateTime.now();
                                     }
@@ -202,7 +202,7 @@ class _HomePageState extends State<HomePage> {
                                     date = DateTime.now();
                                   }
                                 } else if (dateRaw is Timestamp) {
-                                  date = (dateRaw as Timestamp).toDate();
+                                  date = dateRaw.toDate();
                                 } else {
                                   date = DateTime.now();
                                 }
@@ -230,7 +230,6 @@ class _HomePageState extends State<HomePage> {
                             }
                           }
                         }
-                        final monthlyBalance = monthlyIncome + monthlyExpense;
                         // monthlyBalance is available here if needed
                         return Row(
                           children: [
@@ -302,44 +301,17 @@ class _HomePageState extends State<HomePage> {
                           }
                           if (!snapshot.hasData ||
                               snapshot.data!.docs.isEmpty) {
-                            return Column(
-                              children: [
-                                // Show monthly income/expense as 0 if no data
-                                Row(
-                                  children: [
-                                    Text(
-                                      "수입 +0",
-                                      style: const TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.blue,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 20),
-                                    Text(
-                                      "지출 -0",
-                                      style: const TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.red,
-                                      ),
-                                    ),
-                                  ],
+                            return const Expanded(
+                              child: Center(
+                                child: Text(
+                                  "지출 내역이 없습니다.",
+                                  style: TextStyle(fontSize: 16),
                                 ),
-                                const SizedBox(height: 16),
-                                const Expanded(
-                                  child: Center(
-                                    child: Text(
-                                      "지출 내역이 없습니다.",
-                                      style: TextStyle(fontSize: 16),
-                                    ),
-                                  ),
-                                ),
-                              ],
+                              ),
                             );
                           }
                           final docs = snapshot.data!.docs;
-                          // Parse date safely, sort by date
+
                           final List<Map<String, dynamic>> sortedTransactions =
                               docs.map<Map<String, dynamic>>((doc) {
                                 final data = doc.data() as Map<String, dynamic>;
@@ -362,24 +334,6 @@ class _HomePageState extends State<HomePage> {
                                   b['date'] as DateTime,
                                 ),
                               );
-
-                          // --- Compute monthly income/expense for selected month/year ---
-                          final currentMonthTx = sortedTransactions.where((tx) {
-                            final txDate = tx['date'] as DateTime;
-                            return txDate.year == viewModel.selectedYear &&
-                                txDate.month == viewModel.selectedMonth;
-                          }).toList();
-
-                          int monthlyIncome = 0;
-                          int monthlyExpense = 0;
-                          for (final tx in currentMonthTx) {
-                            final amount = tx['amount'] as int;
-                            if (amount > 0) {
-                              monthlyIncome += amount;
-                            } else {
-                              monthlyExpense += amount;
-                            }
-                          }
 
                           return Column(
                             children: [
