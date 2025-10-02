@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:propercloure/presentation/page/login/login_page.dart';
 import 'package:propercloure/presentation/page/Home/home_view_model.dart';
+import 'package:propercloure/presentation/page/minuse/minuse_view_model.dart';
 import 'package:propercloure/presentation/page/property/propety_viwe_model.dart';
+import 'package:propercloure/presentation/page/pulse/pulse_view_model.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -21,6 +23,8 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => PropertyViewModel()),
         ChangeNotifierProvider(create: (_) => HomeViewModel()),
+        ChangeNotifierProvider(create: (_) => PulseViewModel()),
+        ChangeNotifierProvider(create: (_) => MinuseViewModel()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

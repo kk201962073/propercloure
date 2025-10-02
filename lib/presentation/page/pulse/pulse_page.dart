@@ -1,7 +1,27 @@
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'pulse_view_model.dart';
+import 'package:propercloure/presentation/page/Home/home_view_model.dart';
 
-class PlusePage extends StatelessWidget {
+class PlusePage extends StatefulWidget {
   const PlusePage({super.key});
+
+  @override
+  State<PlusePage> createState() => _PlusePageState();
+}
+
+class _PlusePageState extends State<PlusePage> {
+  @override
+  void initState() {
+    super.initState();
+    // 홈에서 불러온 거래 목록을 PulseViewModel로 복사
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final homeVM = context.read<HomeViewModel>();
+      final pulseVM = context.read<PulseViewModel>();
+      pulseVM.setTransactions(homeVM.transactions);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +32,7 @@ class PlusePage extends StatelessWidget {
             color: const Color.fromARGB(255, 124, 197, 230),
             child: Container(
               width: double.infinity,
-              height: 300,
+              height: 200,
               color: const Color.fromARGB(255, 124, 197, 230),
               child: Stack(
                 children: [
@@ -46,29 +66,41 @@ class PlusePage extends StatelessWidget {
                   ),
 
                   // 중앙 금액
-                  const Center(
+                  Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        SizedBox(height: 80),
-                        Text(
-                          "0원",
-                          style: TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
+                        const SizedBox(height: 80),
+                        Consumer<PulseViewModel>(
+                          builder: (context, vm, _) => Text(
+                            "${vm.incomeTotal}원",
+                            style: const TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  // 우측 하단 날짜순
-                  const Positioned(
+                  // 우측 하단 날짜순 (정렬 토글)
+                  Positioned(
                     right: 12,
                     bottom: 8,
-                    child: Text(
-                      "날짜순",
-                      style: TextStyle(fontSize: 14, color: Colors.black54),
+                    child: GestureDetector(
+                      onTap: () {
+                        context.read<PulseViewModel>().toggleSortOrder();
+                      },
+                      child: Consumer<PulseViewModel>(
+                        builder: (context, vm, _) => Text(
+                          (vm.isAscending ?? true) ? "날짜↑" : "날짜↓",
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.black54,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -79,11 +111,45 @@ class PlusePage extends StatelessWidget {
             child: SafeArea(
               child: Container(
                 color: Colors.white,
-                child: const Center(
-                  child: Text(
-                    "수입 내역이 없습니다.",
-                    style: TextStyle(color: Colors.black45, fontSize: 16),
-                  ),
+                child: Consumer<PulseViewModel>(
+                  builder: (context, vm, _) {
+                    final incomeList = vm.incomeTransactions
+                        .where((tx) => tx.category != "기타")
+                        .toList();
+                    if (incomeList.isEmpty) {
+                      return const Center(
+                        child: Text(
+                          "수입 내역이 없습니다.",
+                          style: TextStyle(color: Colors.black45, fontSize: 16),
+                        ),
+                      );
+                    }
+                    return ListView.builder(
+                      itemCount: incomeList.length,
+                      itemBuilder: (context, index) {
+                        final tx = incomeList[index];
+                        return ListTile(
+                          title: Text(
+                            tx.category,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          subtitle: Text(
+                            DateFormat('yyyy-MM-dd HH:mm').format(tx.date),
+                          ),
+                          trailing: Text(
+                            "${NumberFormat('#,###').format(tx.amount)}원",
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
                 ),
               ),
             ),

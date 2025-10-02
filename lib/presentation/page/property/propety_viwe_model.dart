@@ -16,9 +16,11 @@ class PropertyViewModel extends ChangeNotifier {
   /// 전체 합: 모든 레코드의 amount 합계
   int get total => _records.fold(0, (sum, r) => sum + _amountOf(r));
 
-  /// 수입: amount가 양수인 항목들의 합
+  /// 수입: amount가 양수이면서 category가 '기타'가 아닌 항목들의 합
   int get income => _records
-      .where((r) => _amountOf(r) > 0)
+      .where(
+        (r) => _amountOf(r) > 0 && (r['category']?.toString() ?? '') != '기타',
+      )
       .fold(0, (sum, r) => sum + _amountOf(r));
 
   /// 지출: amount가 음수인 항목들의 절대값 합

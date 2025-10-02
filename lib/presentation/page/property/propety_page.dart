@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:propercloure/presentation/page/list/list_page.dart';
 import 'package:propercloure/presentation/page/minuse/minuse_page.dart';
 import 'package:propercloure/presentation/page/property/propety_viwe_model.dart';
-import 'package:propercloure/presentation/page/pulse/pulse_page.dart';
 import 'package:propercloure/presentation/page/guitar/guitar_page.dart';
 import 'package:propercloure/presentation/page/home/home_page.dart';
+import 'package:propercloure/presentation/page/pulse/pulse_page.dart';
 import 'package:provider/provider.dart';
 
 class PropertyPage extends StatelessWidget {
@@ -118,38 +117,6 @@ class PropertyPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 20),
-
-                // 내 계좌
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      "내 계좌",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const ListPage(),
-                          ),
-                        );
-                      },
-                      child: Text(
-                        "${_formatAmount(cash)} >",
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                _buildAssetCard("현금", _formatAmount(cash)),
-
-                const SizedBox(height: 30),
 
                 // 내역
                 Row(
