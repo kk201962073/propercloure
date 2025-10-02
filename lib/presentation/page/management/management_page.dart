@@ -13,6 +13,7 @@ class _ManagementPageState extends State<ManagementPage> {
   final TextEditingController _nicknameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   bool _isEditing = false;
+  String _photoUrl = '';
 
   @override
   void initState() {
@@ -32,6 +33,7 @@ class _ManagementPageState extends State<ManagementPage> {
         if (data != null) {
           _nicknameController.text = data['name'] ?? '';
           _emailController.text = data['email'] ?? '';
+          _photoUrl = data['photoUrl'] ?? '';
           setState(() {});
         }
       }
@@ -83,10 +85,12 @@ class _ManagementPageState extends State<ManagementPage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const SizedBox(height: 40),
-            const Image(
-              image: AssetImage("assets/image/logo.png"),
-              width: 80,
-              height: 80,
+            CircleAvatar(
+              radius: 40,
+              backgroundColor: Colors.white,
+              backgroundImage: _photoUrl.isNotEmpty
+                  ? NetworkImage(_photoUrl)
+                  : const AssetImage("assets/image/logo.png") as ImageProvider,
             ),
             const SizedBox(height: 40),
             Padding(

@@ -33,9 +33,9 @@ class GoogleLoginViewModel {
       final user = userCredential.user;
       if (user != null) {
         await FirebaseFirestore.instance.collection("users").doc(user.uid).set({
-          "email": user.email,
-          "name": user.displayName,
-          "photoUrl": user.photoURL,
+          "email": user.email ?? "",
+          "name": user.displayName ?? "이름 없음",
+          "photoUrl": user.photoURL ?? "",
           "lastLogin": FieldValue.serverTimestamp(),
         }, SetOptions(merge: true));
       }

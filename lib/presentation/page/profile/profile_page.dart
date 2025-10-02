@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:propercloure/presentation/page/login/login_page.dart';
 import 'package:propercloure/presentation/page/management/management_page.dart';
 import 'package:propercloure/presentation/page/scren theme/screntheme_page.dart';
 import 'package:propercloure/presentation/page/home/home_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -72,6 +78,10 @@ class ProfilePage extends StatelessWidget {
                         "이메일 정보 없음",
                         style: TextStyle(fontSize: 14, color: Colors.grey),
                       ),
+                      const Text(
+                        "바른 맺음 1.0.0",
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
                     ],
                   );
                 }
@@ -96,6 +106,10 @@ class ProfilePage extends StatelessWidget {
                       const Text(
                         "이메일 정보 없음",
                         style: TextStyle(fontSize: 14, color: Colors.grey),
+                      ),
+                      const Text(
+                        "바른 맺음 1.0.0",
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
                       ),
                     ],
                   );
@@ -125,6 +139,10 @@ class ProfilePage extends StatelessWidget {
                     Text(
                       email,
                       style: const TextStyle(fontSize: 14, color: Colors.grey),
+                    ),
+                    const Text(
+                      "바른 맺음 1.0.0",
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                   ],
                 );
@@ -185,13 +203,16 @@ class ProfilePage extends StatelessWidget {
                       return ListTile(
                         title: const Text("프로필 관리"),
                         trailing: Text("$displayName >"),
-                        onTap: () {
-                          Navigator.push(
+                        onTap: () async {
+                          final result = await Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) => ManagementPage(),
                             ),
                           );
+                          if (result == true) {
+                            setState(() {});
+                          }
                         },
                       );
                     },
@@ -218,7 +239,7 @@ class ProfilePage extends StatelessWidget {
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const HomePage(),
+                                builder: (context) => const LoginPage(),
                               ),
                             );
                           },
