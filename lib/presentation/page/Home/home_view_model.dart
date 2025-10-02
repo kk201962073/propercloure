@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:propercloure/presentation/page/property/propety_viwe_model.dart';
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class HomeViewModel extends ChangeNotifier {
   DateTime _selectedDay = DateTime.now();
@@ -12,9 +15,6 @@ class HomeViewModel extends ChangeNotifier {
   HomeViewModel() {
     try {
       _firestore = FirebaseFirestore.instance;
-      try {
-        loadTransactions();
-      } catch (e) {}
     } catch (e) {}
   }
 
@@ -48,21 +48,39 @@ class HomeViewModel extends ChangeNotifier {
     return List.generate(11, (index) => currentYear - 5 + index);
   }
 
-  void loadTransactions() {
+  void loadTransactions(PropertyViewModel propertyViewModel) {
     _firestore.collection('transactions').snapshots().listen((querySnapshot) {
-      transactions = querySnapshot.docs.map<Map<String, dynamic>>((doc) {
-        final data = doc.data();
-        return {
-          'id': doc.id,
-          'title': data['title'] ?? '',
-          'amount': data['amount'] ?? 0,
-          'category': data['category'] ?? '',
-          'date': data['date'] != null
-              ? DateTime.tryParse(data['date'].toString()) ?? DateTime.now()
-              : DateTime.now(),
-        };
-      }).toList();
-      notifyListeners();
+      try {
+        transactions = querySnapshot.docs.map<Map<String, dynamic>>((doc) {
+          final data = doc.data();
+          final rawAmount = data['amount'];
+          int parsedAmount = 0;
+          if (rawAmount is int) {
+            parsedAmount = rawAmount;
+          } else if (rawAmount is String) {
+            parsedAmount = int.tryParse(rawAmount) ?? 0;
+          }
+          return {
+            'id': doc.id,
+            'title': data['title'] ?? '',
+            'amount': parsedAmount,
+            'category': data['category'] ?? '',
+            'date': data['date'] != null
+                ? DateTime.tryParse(data['date'].toString()) ?? DateTime.now()
+                : DateTime.now(),
+          };
+        }).toList();
+        debugPrint(
+          "[HomeViewModel] Transactions loaded: ${transactions.length}",
+        );
+        propertyViewModel.setRecords(transactions);
+        debugPrint(
+          "[HomeViewModel] setRecords 호출됨. 길이: ${transactions.length}",
+        );
+        notifyListeners();
+      } catch (e, st) {
+        debugPrint("[HomeViewModel] Error parsing transactions: $e\n$st");
+      }
     });
   }
 

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:propercloure/presentation/page/login/login_page.dart';
+import 'package:propercloure/presentation/page/Home/home_view_model.dart';
+import 'package:propercloure/presentation/page/property/propety_viwe_model.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,6 +17,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(home: const LoginPage());
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => PropertyViewModel()),
+        ChangeNotifierProvider(create: (_) => HomeViewModel()),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: const LoginPage(),
+      ),
+    );
   }
 }

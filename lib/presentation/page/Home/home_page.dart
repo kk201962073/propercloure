@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:propercloure/presentation/page/add/add_page.dart';
+import 'package:propercloure/presentation/page/property/propety_viwe_model.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:propercloure/presentation/page/Home/home_view_model.dart';
@@ -8,9 +9,27 @@ import 'package:propercloure/presentation/page/property/propety_page.dart';
 import 'package:propercloure/presentation/page/profile/profile_page.dart';
 import 'package:propercloure/presentation/page/ai/ai_page.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   final bool hasExpense;
   const HomePage({super.key, this.hasExpense = false});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      final homeViewModel = Provider.of<HomeViewModel>(context, listen: false);
+      final propertyViewModel = Provider.of<PropertyViewModel>(
+        context,
+        listen: false,
+      );
+      homeViewModel.loadTransactions(propertyViewModel);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -92,37 +111,149 @@ class HomePage extends StatelessWidget {
                             ],
                           ),
                         ),
-                        Text(
-                          "총 합계 ${viewModel.monthlyBalance}",
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        // 총 합계는 아래 StreamBuilder에서 계산된 값을 사용하도록 교체됨
+                        StreamBuilder<QuerySnapshot>(
+                          stream: FirebaseFirestore.instance
+                              .collection('transactions')
+                              .snapshots(),
+                          builder: (context, snapshot) {
+                            int monthlyIncome = 0;
+                            int monthlyExpense = 0;
+                            if (snapshot.hasData &&
+                                snapshot.data!.docs.isNotEmpty) {
+                              final docs = snapshot.data!.docs;
+                              final List<Map<String, dynamic>> parsed = docs
+                                  .map<Map<String, dynamic>>((doc) {
+                                    final data =
+                                        doc.data() as Map<String, dynamic>;
+                                    final dynamic dateRaw = data['date'];
+                                    DateTime date;
+                                    if (dateRaw is DateTime) {
+                                      date = dateRaw;
+                                    } else if (dateRaw is String) {
+                                      try {
+                                        date = DateTime.parse(dateRaw);
+                                      } catch (_) {
+                                        date = DateTime.now();
+                                      }
+                                    } else if (dateRaw is Timestamp) {
+                                      date = (dateRaw as Timestamp).toDate();
+                                    } else {
+                                      date = DateTime.now();
+                                    }
+                                    return {...data, 'date': date};
+                                  })
+                                  .toList();
+                              final currentMonthTx = parsed.where((tx) {
+                                final txDate = tx['date'] as DateTime;
+                                return txDate.year == viewModel.selectedYear &&
+                                    txDate.month == viewModel.selectedMonth;
+                              }).toList();
+                              for (final tx in currentMonthTx) {
+                                final amount = tx['amount'] is int
+                                    ? tx['amount'] as int
+                                    : int.tryParse(
+                                            tx['amount']?.toString() ?? '0',
+                                          ) ??
+                                          0;
+                                if (amount > 0) {
+                                  monthlyIncome += amount;
+                                } else {
+                                  monthlyExpense += amount;
+                                }
+                              }
+                            }
+                            final monthlyBalance =
+                                monthlyIncome + monthlyExpense;
+                            return Text(
+                              "총 합계 $monthlyBalance",
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),
                     const SizedBox(height: 12),
-                    // 수입 / 지출 (월간)
-                    Row(
-                      children: [
-                        Text(
-                          "수입 +${viewModel.monthlyIncome}",
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue,
-                          ),
-                        ),
-                        const SizedBox(width: 20),
-                        Text(
-                          "지출 -${viewModel.monthlyExpense}",
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.red,
-                          ),
-                        ),
-                      ],
+                    // 월간 수입/지출 요약 (달력 위)
+                    StreamBuilder<QuerySnapshot>(
+                      stream: FirebaseFirestore.instance
+                          .collection('transactions')
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        int monthlyIncome = 0;
+                        int monthlyExpense = 0;
+                        if (snapshot.hasData &&
+                            snapshot.data!.docs.isNotEmpty) {
+                          final docs = snapshot.data!.docs;
+                          final List<Map<String, dynamic>> parsed = docs
+                              .map<Map<String, dynamic>>((doc) {
+                                final data = doc.data() as Map<String, dynamic>;
+                                final dynamic dateRaw = data['date'];
+                                DateTime date;
+                                if (dateRaw is DateTime) {
+                                  date = dateRaw;
+                                } else if (dateRaw is String) {
+                                  try {
+                                    date = DateTime.parse(dateRaw);
+                                  } catch (_) {
+                                    date = DateTime.now();
+                                  }
+                                } else if (dateRaw is Timestamp) {
+                                  date = (dateRaw as Timestamp).toDate();
+                                } else {
+                                  date = DateTime.now();
+                                }
+                                return {...data, 'date': date};
+                              })
+                              .toList();
+
+                          final currentMonthTx = parsed.where((tx) {
+                            final txDate = tx['date'] as DateTime;
+                            return txDate.year == viewModel.selectedYear &&
+                                txDate.month == viewModel.selectedMonth;
+                          }).toList();
+
+                          for (final tx in currentMonthTx) {
+                            final amount = tx['amount'] is int
+                                ? tx['amount'] as int
+                                : int.tryParse(
+                                        tx['amount']?.toString() ?? '0',
+                                      ) ??
+                                      0;
+                            if (amount > 0) {
+                              monthlyIncome += amount;
+                            } else {
+                              monthlyExpense += amount;
+                            }
+                          }
+                        }
+                        final monthlyBalance = monthlyIncome + monthlyExpense;
+                        // monthlyBalance is available here if needed
+                        return Row(
+                          children: [
+                            Text(
+                              "수입 +$monthlyIncome",
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blue,
+                              ),
+                            ),
+                            const SizedBox(width: 20),
+                            Text(
+                              "지출 -${monthlyExpense.abs()}",
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.red,
+                              ),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                     const SizedBox(height: 16),
 
@@ -156,7 +287,7 @@ class HomePage extends StatelessWidget {
 
                     const SizedBox(height: 50),
 
-                    // 지출 내역 - Firestore StreamBuilder (실시간 반영)
+                    // 지출 내역 - Firestore StreamBuilder (실시간 반영) + 월간 수입/지출 계산
                     Expanded(
                       child: StreamBuilder<QuerySnapshot>(
                         stream: FirebaseFirestore.instance
@@ -171,11 +302,40 @@ class HomePage extends StatelessWidget {
                           }
                           if (!snapshot.hasData ||
                               snapshot.data!.docs.isEmpty) {
-                            return const Center(
-                              child: Text(
-                                "지출 내역이 없습니다.",
-                                style: TextStyle(fontSize: 16),
-                              ),
+                            return Column(
+                              children: [
+                                // Show monthly income/expense as 0 if no data
+                                Row(
+                                  children: [
+                                    Text(
+                                      "수입 +0",
+                                      style: const TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.blue,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 20),
+                                    Text(
+                                      "지출 -0",
+                                      style: const TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.red,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+                                const Expanded(
+                                  child: Center(
+                                    child: Text(
+                                      "지출 내역이 없습니다.",
+                                      style: TextStyle(fontSize: 16),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             );
                           }
                           final docs = snapshot.data!.docs;
@@ -202,25 +362,52 @@ class HomePage extends StatelessWidget {
                                   b['date'] as DateTime,
                                 ),
                               );
-                          return ListView.builder(
-                            itemCount: sortedTransactions.length,
-                            itemBuilder: (context, index) {
-                              final tx = sortedTransactions[index];
-                              final DateTime txDate = tx['date'] as DateTime;
-                              final int amount = (tx['amount'] is int)
-                                  ? tx['amount'] as int
-                                  : int.tryParse(
-                                          tx['amount']?.toString() ?? '0',
-                                        ) ??
-                                        0;
-                              final String category =
-                                  tx['category']?.toString() ?? '기타';
-                              return _buildExpenseItem(
-                                amount,
-                                category,
-                                txDate,
-                              );
-                            },
+
+                          // --- Compute monthly income/expense for selected month/year ---
+                          final currentMonthTx = sortedTransactions.where((tx) {
+                            final txDate = tx['date'] as DateTime;
+                            return txDate.year == viewModel.selectedYear &&
+                                txDate.month == viewModel.selectedMonth;
+                          }).toList();
+
+                          int monthlyIncome = 0;
+                          int monthlyExpense = 0;
+                          for (final tx in currentMonthTx) {
+                            final amount = tx['amount'] as int;
+                            if (amount > 0) {
+                              monthlyIncome += amount;
+                            } else {
+                              monthlyExpense += amount;
+                            }
+                          }
+
+                          return Column(
+                            children: [
+                              // 지출 내역 리스트
+                              Expanded(
+                                child: ListView.builder(
+                                  itemCount: sortedTransactions.length,
+                                  itemBuilder: (context, index) {
+                                    final tx = sortedTransactions[index];
+                                    final DateTime txDate =
+                                        tx['date'] as DateTime;
+                                    final int amount = (tx['amount'] is int)
+                                        ? tx['amount'] as int
+                                        : int.tryParse(
+                                                tx['amount']?.toString() ?? '0',
+                                              ) ??
+                                              0;
+                                    final String category =
+                                        tx['category']?.toString() ?? '기타';
+                                    return _buildExpenseItem(
+                                      amount,
+                                      category,
+                                      txDate,
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
                           );
                         },
                       ),
@@ -417,7 +604,7 @@ Widget _buildExpenseItem(int amount, String category, DateTime date) {
           ),
         ),
         Text(
-          "$amount",
+          isIncome ? "+${amount.abs()}원" : "-${amount.abs()}원",
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,

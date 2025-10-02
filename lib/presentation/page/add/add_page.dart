@@ -15,6 +15,7 @@ class AddPage extends StatefulWidget {
 
 class _AddPageState extends State<AddPage> {
   final TextEditingController _controller = TextEditingController();
+  bool _isIncome = true;
 
   @override
   Widget build(BuildContext context) {
@@ -95,9 +96,9 @@ class _AddPageState extends State<AddPage> {
                             keyboardType: TextInputType.number,
                             textAlign: TextAlign.right,
                             maxLines: 1,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 50,
-                              color: Colors.blue,
+                              color: _isIncome ? Colors.blue : Colors.red,
                               fontWeight: FontWeight.w500,
                             ),
                             decoration: const InputDecoration(
@@ -145,10 +146,14 @@ class _AddPageState extends State<AddPage> {
                                 category = result['category'];
                               }
                             }
+                            setState(() {
+                              _isIncome = true;
+                            });
                             Navigator.pop(context, {
                               'amount': viewModel.amountRight.abs(),
                               'category': category,
                               'date': viewModel.selectedDate,
+                              'type': 'income',
                             });
                           },
                           child: const Text(
@@ -191,10 +196,14 @@ class _AddPageState extends State<AddPage> {
                                 category = result['category'];
                               }
                             }
+                            setState(() {
+                              _isIncome = false;
+                            });
                             Navigator.pop(context, {
                               'amount': -viewModel.amountRight.abs(),
                               'category': category,
                               'date': viewModel.selectedDate,
+                              'type': 'expense',
                             });
                           },
                           child: const Text(
