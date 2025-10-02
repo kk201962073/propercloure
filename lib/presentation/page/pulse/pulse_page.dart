@@ -73,7 +73,7 @@ class _PlusePageState extends State<PlusePage> {
                         const SizedBox(height: 80),
                         Consumer<PulseViewModel>(
                           builder: (context, vm, _) => Text(
-                            "${vm.incomeTotal}원",
+                            "${NumberFormat('#,###').format(vm.incomeTotal)}원",
                             style: const TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.bold,
@@ -94,7 +94,7 @@ class _PlusePageState extends State<PlusePage> {
                       },
                       child: Consumer<PulseViewModel>(
                         builder: (context, vm, _) => Text(
-                          (vm.isAscending ?? true) ? "날짜↑" : "날짜↓",
+                          (vm.isAscending) ? "날짜↑" : "날짜↓",
                           style: const TextStyle(
                             fontSize: 14,
                             color: Colors.black54,

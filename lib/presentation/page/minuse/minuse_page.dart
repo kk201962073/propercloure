@@ -73,7 +73,7 @@ class _MinusePageState extends State<MinusePage> {
                         const SizedBox(height: 80),
                         Consumer<MinuseViewModel>(
                           builder: (context, vm, _) => Text(
-                            "${vm.expenseTotal}원",
+                            "${NumberFormat('#,###').format(vm.expenseTotal)}원",
                             style: const TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.bold,
@@ -94,7 +94,7 @@ class _MinusePageState extends State<MinusePage> {
                       },
                       child: Consumer<MinuseViewModel>(
                         builder: (context, vm, _) => Text(
-                          (vm.isAscending ?? true) ? "날짜↑" : "날짜↓",
+                          vm.isAscending ? "날짜↑" : "날짜↓",
                           style: const TextStyle(
                             fontSize: 14,
                             color: Colors.black54,

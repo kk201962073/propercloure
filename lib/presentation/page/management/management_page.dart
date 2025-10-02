@@ -1,10 +1,68 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-class ManagementPage extends StatelessWidget {
+class ManagementPage extends StatefulWidget {
   const ManagementPage({super.key});
 
   @override
+  State<ManagementPage> createState() => _ManagementPageState();
+}
+
+class _ManagementPageState extends State<ManagementPage> {
+  final TextEditingController _nicknameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  bool _isEditing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid != null) {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .get();
+      if (doc.exists) {
+        final data = doc.data();
+        if (data != null) {
+          _nicknameController.text = data['name'] ?? '';
+          _emailController.text = data['email'] ?? '';
+          setState(() {});
+        }
+      }
+    }
+  }
+
+  Future<void> _saveUserData() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid != null) {
+      await FirebaseFirestore.instance.collection('users').doc(uid).update({
+        'name': _nicknameController.text,
+        'email': _emailController.text,
+      });
+      setState(() {
+        _isEditing = false;
+      });
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text("수정 되었습니다."),
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.only(bottom: 80, left: 16, right: 16),
+        ),
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Move the existing Scaffold build code here (currently below in ManagementPage)
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -25,64 +83,66 @@ class ManagementPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const SizedBox(height: 40),
-
-            // 로고
             const Image(
               image: AssetImage("assets/image/logo.png"),
               width: 80,
               height: 80,
             ),
             const SizedBox(height: 40),
-
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.start,
-                children: const [
-                  Text(
+                children: [
+                  const Text(
                     "닉네임",
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
-                  SizedBox(width: 20),
+                  const SizedBox(width: 20),
                   Flexible(
-                    child: Text(
-                      "abc123",
-                      style: TextStyle(fontSize: 16),
-                      overflow: TextOverflow.ellipsis,
+                    child: TextField(
+                      controller: _nicknameController,
+                      readOnly: !_isEditing,
+                      style: const TextStyle(fontSize: 16),
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        isDense: true,
+                        contentPadding: EdgeInsets.zero,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 12),
-
-            // 이메일
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.start,
-                children: const [
-                  Text(
+                children: [
+                  const Text(
                     "이메일",
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
-                  SizedBox(width: 20),
+                  const SizedBox(width: 20),
                   Flexible(
-                    child: Text(
-                      "abcdefghij@privaterelay.appleid.com",
-                      style: TextStyle(fontSize: 16),
-                      overflow: TextOverflow.ellipsis,
+                    child: TextField(
+                      controller: _emailController,
+                      readOnly: !_isEditing,
+                      style: const TextStyle(fontSize: 16),
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        isDense: true,
+                        contentPadding: EdgeInsets.zero,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-
             const SizedBox(height: 30),
-
-            // 수정 버튼
             SizedBox(
               width: double.infinity,
               height: 50,
@@ -93,7 +153,11 @@ class ManagementPage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  setState(() {
+                    _isEditing = true;
+                  });
+                },
                 child: const Text(
                   "수정",
                   style: TextStyle(color: Colors.white, fontSize: 16),
@@ -101,8 +165,6 @@ class ManagementPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-
-            // 저장 버튼
             SizedBox(
               width: double.infinity,
               height: 50,
@@ -113,7 +175,9 @@ class ManagementPage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                onPressed: () {},
+                onPressed: _isEditing
+                    ? () async => await _saveUserData()
+                    : null,
                 child: const Text(
                   "저장",
                   style: TextStyle(color: Colors.white, fontSize: 16),

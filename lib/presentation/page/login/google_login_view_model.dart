@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class GoogleLoginViewModel {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
@@ -28,6 +29,16 @@ class GoogleLoginViewModel {
       // Firebase에 인증
       final UserCredential userCredential = await _firebaseAuth
           .signInWithCredential(credential);
+
+      final user = userCredential.user;
+      if (user != null) {
+        await FirebaseFirestore.instance.collection("users").doc(user.uid).set({
+          "email": user.email,
+          "name": user.displayName,
+          "photoUrl": user.photoURL,
+          "lastLogin": FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+      }
 
       return userCredential;
     } catch (e) {

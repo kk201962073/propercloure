@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:propercloure/presentation/page/management/management_page.dart';
 import 'package:propercloure/presentation/page/scren theme/screntheme_page.dart';
-
 import 'package:propercloure/presentation/page/home/home_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -34,23 +35,100 @@ class ProfilePage extends StatelessWidget {
             const SizedBox(height: 20),
 
             // 로고와 앱 이름
-            Column(
-              children: const [
-                Image(
-                  image: AssetImage("assets/image/logo.png"),
-                  width: 80,
-                  height: 80,
-                ),
-                SizedBox(height: 12),
-                Text(
-                  "바른 맞음",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  "버전 1.0.0",
-                  style: TextStyle(fontSize: 14, color: Colors.grey),
-                ),
-              ],
+            FutureBuilder<DocumentSnapshot<Map<String, dynamic>>?>(
+              future: () async {
+                final user = FirebaseAuth.instance.currentUser;
+                if (user == null) {
+                  return null;
+                }
+                return FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(user.uid)
+                    .get();
+              }(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const CircularProgressIndicator();
+                }
+                if (!snapshot.hasData || snapshot.data == null) {
+                  return Column(
+                    children: [
+                      CircleAvatar(
+                        radius: 40,
+                        backgroundColor: Colors.white,
+                        backgroundImage: const AssetImage(
+                          "assets/image/logo.png",
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        "바른 맞음",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Text(
+                        "이메일 정보 없음",
+                        style: TextStyle(fontSize: 14, color: Colors.grey),
+                      ),
+                    ],
+                  );
+                }
+                if (!snapshot.data!.exists) {
+                  return Column(
+                    children: [
+                      CircleAvatar(
+                        radius: 40,
+                        backgroundColor: Colors.white,
+                        backgroundImage: const AssetImage(
+                          "assets/image/logo.png",
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        "바른 맞음",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Text(
+                        "이메일 정보 없음",
+                        style: TextStyle(fontSize: 14, color: Colors.grey),
+                      ),
+                    ],
+                  );
+                }
+                final data = snapshot.data!.data() ?? {};
+                final photoUrl = data['photoUrl'] as String?;
+                final name = data['name'] as String? ?? "바른 맞음";
+                final email = data['email'] as String? ?? "이메일 정보 없음";
+                return Column(
+                  children: [
+                    CircleAvatar(
+                      radius: 40,
+                      backgroundColor: Colors.white,
+                      backgroundImage: photoUrl != null && photoUrl.isNotEmpty
+                          ? NetworkImage(photoUrl)
+                          : const AssetImage("assets/image/logo.png")
+                                as ImageProvider,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      name,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      email,
+                      style: const TextStyle(fontSize: 14, color: Colors.grey),
+                    ),
+                  ],
+                );
+              },
             ),
 
             const SizedBox(height: 40),
@@ -85,15 +163,36 @@ class ProfilePage extends StatelessWidget {
                   ),
 
                   // 프로필 관리
-                  ListTile(
-                    title: const Text("프로필 관리"),
-                    trailing: const Text("abc123 >"),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ManagementPage(),
-                        ),
+                  FutureBuilder<DocumentSnapshot<Map<String, dynamic>>?>(
+                    future: () async {
+                      final user = FirebaseAuth.instance.currentUser;
+                      if (user == null) {
+                        return null;
+                      }
+                      return FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(user.uid)
+                          .get();
+                    }(),
+                    builder: (context, snapshot) {
+                      String displayName = "닉네임 없음";
+                      if (snapshot.hasData &&
+                          snapshot.data != null &&
+                          snapshot.data!.exists) {
+                        final data = snapshot.data!.data() ?? {};
+                        displayName = data['name'] as String? ?? "닉네임 없음";
+                      }
+                      return ListTile(
+                        title: const Text("프로필 관리"),
+                        trailing: Text("$displayName >"),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ManagementPage(),
+                            ),
+                          );
+                        },
                       );
                     },
                   ),
@@ -113,7 +212,16 @@ class ProfilePage extends StatelessWidget {
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          onPressed: () {},
+                          onPressed: () async {
+                            await FirebaseAuth.instance.signOut();
+                            if (!context.mounted) return;
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const HomePage(),
+                              ),
+                            );
+                          },
                           child: const Text(
                             "로그인 아웃",
                             style: TextStyle(color: Colors.white, fontSize: 16),
@@ -131,7 +239,24 @@ class ProfilePage extends StatelessWidget {
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          onPressed: () {},
+                          onPressed: () async {
+                            final currentUser =
+                                FirebaseAuth.instance.currentUser;
+                            if (currentUser != null) {
+                              await FirebaseFirestore.instance
+                                  .collection('users')
+                                  .doc(currentUser.uid)
+                                  .delete();
+                              await currentUser.delete();
+                            }
+                            if (!context.mounted) return;
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const HomePage(),
+                              ),
+                            );
+                          },
                           child: const Text(
                             "회원 탈퇴",
                             style: TextStyle(color: Colors.white, fontSize: 16),
