@@ -27,18 +27,21 @@ class ExpensePage extends StatelessWidget {
     ];
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(amount.toString()),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
         elevation: 0,
       ),
-      body: _buildCategoryGrid(expenseCategories),
+      body: _buildCategoryGrid(expenseCategories, context),
     );
   }
 
-  Widget _buildCategoryGrid(List<Map<String, dynamic>> categories) {
+  Widget _buildCategoryGrid(
+    List<Map<String, dynamic>> categories,
+    BuildContext context,
+  ) {
     return GridView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: categories.length,
@@ -69,7 +72,14 @@ class ExpensePage extends StatelessWidget {
                 child: Image.asset(category['image'], fit: BoxFit.contain),
               ),
               const SizedBox(height: 8),
-              Text(category['label']),
+              Text(
+                category['label'],
+                style: TextStyle(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black,
+                ),
+              ),
             ],
           ),
         );

@@ -12,7 +12,7 @@ class LoginPage extends StatelessWidget {
     final appleLoginVM = AppleLoginViewModel(); // Apple 로그인 ViewModel
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Center(
           child: Column(
@@ -39,7 +39,16 @@ class LoginPage extends StatelessWidget {
                     } else {
                       // 로그인 실패
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('로그인에 실패했습니다.')),
+                        SnackBar(
+                          content: Text(
+                            '로그인에 실패했습니다.',
+                            style: TextStyle(
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium?.color,
+                            ),
+                          ),
+                        ),
                       );
                     }
                   },
@@ -71,7 +80,16 @@ class LoginPage extends StatelessWidget {
                     } catch (e) {
                       // 로그인 실패
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('로그인에 실패했습니다.')),
+                        SnackBar(
+                          content: Text(
+                            '로그인에 실패했습니다.',
+                            style: TextStyle(
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium?.color,
+                            ),
+                          ),
+                        ),
                       );
                     }
                   },

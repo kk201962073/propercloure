@@ -33,12 +33,17 @@ class _AddPageState extends State<AddPage> {
           }
 
           return Scaffold(
-            backgroundColor: Colors.white,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             appBar: AppBar(
-              backgroundColor: Colors.white,
-              foregroundColor: Colors.black,
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
               elevation: 0,
-              title: const Text('등록'),
+              title: Text(
+                '등록',
+                style: TextStyle(
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                ),
+              ),
               centerTitle: true,
               actions: [
                 IconButton(
@@ -71,20 +76,26 @@ class _AddPageState extends State<AddPage> {
                       '${viewModel.selectedDate.year}년 '
                       '${viewModel.selectedDate.month.toString().padLeft(2, '0')}월 '
                       '${viewModel.selectedDate.day.toString().padLeft(2, '0')}일',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w500,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                       ),
                     ),
                   ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      const Text(
+                      Text(
                         '₩',
                         style: TextStyle(
                           fontSize: 50,
                           fontWeight: FontWeight.w500,
+                          color: _isIncome
+                              ? (Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.blue
+                                    : Colors.blue)
+                              : Colors.red,
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -98,7 +109,12 @@ class _AddPageState extends State<AddPage> {
                             maxLines: 1,
                             style: TextStyle(
                               fontSize: 50,
-                              color: _isIncome ? Colors.blue : Colors.red,
+                              color: _isIncome
+                                  ? (Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? Colors.blue
+                                        : Colors.blue)
+                                  : Colors.red,
                               fontWeight: FontWeight.w500,
                             ),
                             decoration: const InputDecoration(
@@ -120,7 +136,10 @@ class _AddPageState extends State<AddPage> {
                       Expanded(
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
+                            backgroundColor:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? Colors.blue
+                                : Colors.blue,
                             minimumSize: const Size(148, 76),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.zero,
@@ -156,7 +175,7 @@ class _AddPageState extends State<AddPage> {
                               'type': 'income',
                             });
                           },
-                          child: const Text(
+                          child: Text(
                             "입금",
                             style: TextStyle(
                               fontSize: 25,
@@ -170,7 +189,10 @@ class _AddPageState extends State<AddPage> {
                       Expanded(
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
+                            backgroundColor:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? Colors.red
+                                : Colors.red,
                             minimumSize: const Size(148, 76),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.zero,
@@ -206,7 +228,7 @@ class _AddPageState extends State<AddPage> {
                               'type': 'expense',
                             });
                           },
-                          child: const Text(
+                          child: Text(
                             "지출",
                             style: TextStyle(
                               fontSize: 25,

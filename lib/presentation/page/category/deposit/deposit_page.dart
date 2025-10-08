@@ -25,10 +25,10 @@ class _DepositPageState extends State<DepositPage> {
     ];
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
         elevation: 0,
         title: Text("${widget.amount}원"),
       ),
@@ -64,7 +64,14 @@ class _DepositPageState extends State<DepositPage> {
                 child: Image.asset(category['image'], fit: BoxFit.contain),
               ),
               const SizedBox(height: 8),
-              Text(category['label']),
+              Text(
+                category['label'],
+                style: TextStyle(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black,
+                ),
+              ),
             ],
           ),
         );

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:propercloure/presentation/page/login/login_page.dart';
 import 'package:propercloure/presentation/page/management/management_page.dart';
-import 'package:propercloure/presentation/page/scren theme/screntheme_page.dart';
+import 'package:propercloure/presentation/page/scren_theme/screntheme_page.dart';
 import 'package:propercloure/presentation/page/home/home_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -16,8 +16,12 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final themeLabel = isDarkMode ? "다크 모드" : "라이트 모드";
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).brightness == Brightness.dark
+          ? Colors.black
+          : Colors.white,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -30,8 +34,12 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
         title: const Text("설정"),
         centerTitle: true,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: Theme.of(context).brightness == Brightness.dark
+            ? Colors.black
+            : Colors.white,
+        foregroundColor: Theme.of(context).brightness == Brightness.dark
+            ? Colors.white
+            : Colors.black,
         elevation: 0,
       ),
       body: Padding(
@@ -166,13 +174,16 @@ class _ProfilePageState extends State<ProfilePage> {
                   // 화면 테마
                   ListTile(
                     title: const Text("화면 테마"),
-                    trailing: const Text(
-                      "시스템 설정 >",
-                      style: TextStyle(color: Colors.black),
+                    trailing: Text(
+                      "$themeLabel >",
+                      style: TextStyle(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white
+                            : Colors.black,
+                      ),
                     ),
                     onTap: () {
-                      Navigator.push(
-                        context,
+                      Navigator.of(context, rootNavigator: true).push(
                         MaterialPageRoute(
                           builder: (context) => const ScrenThemePage(),
                         ),

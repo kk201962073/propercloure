@@ -39,7 +39,7 @@ class _HomePageState extends State<HomePage> {
         builder: (context, viewModel, _) {
           DateTime selectedDay = viewModel.selectedDay;
           return Scaffold(
-            backgroundColor: Colors.white,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             body: SafeArea(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -101,13 +101,19 @@ class _HomePageState extends State<HomePage> {
                             children: [
                               Text(
                                 "${viewModel.selectedYear}년 ${viewModel.selectedMonth}월",
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,
+                                  color: Theme.of(
+                                    context,
+                                  ).textTheme.bodyMedium?.color,
                                 ),
                               ),
                               const SizedBox(width: 4),
-                              const Icon(Icons.arrow_drop_down),
+                              Icon(
+                                Icons.arrow_drop_down,
+                                color: Theme.of(context).iconTheme.color,
+                              ),
                             ],
                           ),
                         ),
@@ -167,9 +173,12 @@ class _HomePageState extends State<HomePage> {
                                 monthlyIncome + monthlyExpense;
                             return Text(
                               "총 합계 $monthlyBalance",
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
+                                color: Theme.of(
+                                  context,
+                                ).textTheme.bodyMedium?.color,
                               ),
                             );
                           },
@@ -235,19 +244,23 @@ class _HomePageState extends State<HomePage> {
                           children: [
                             Text(
                               "수입 +$monthlyIncome",
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.blue,
+                                color:
+                                    Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? Colors.blue
+                                    : Theme.of(context).colorScheme.primary,
                               ),
                             ),
                             const SizedBox(width: 20),
                             Text(
                               "지출 -${monthlyExpense.abs()}",
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.red,
+                                color: Theme.of(context).colorScheme.error,
                               ),
                             ),
                           ],
@@ -272,13 +285,15 @@ class _HomePageState extends State<HomePage> {
                         viewModel.setYear(focusedDay.year);
                         viewModel.setMonth(focusedDay.month);
                       },
-                      calendarStyle: const CalendarStyle(
+                      calendarStyle: CalendarStyle(
                         todayDecoration: BoxDecoration(
-                          color: Colors.blue,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.blue
+                              : Theme.of(context).colorScheme.primary,
                           shape: BoxShape.circle,
                         ),
                         selectedDecoration: BoxDecoration(
-                          color: Colors.red,
+                          color: Theme.of(context).colorScheme.error,
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -302,12 +317,7 @@ class _HomePageState extends State<HomePage> {
                           if (!snapshot.hasData ||
                               snapshot.data!.docs.isEmpty) {
                             return const Expanded(
-                              child: Center(
-                                child: Text(
-                                  "지출 내역이 없습니다.",
-                                  style: TextStyle(fontSize: 16),
-                                ),
-                              ),
+                              child: Center(child: _NoExpenseText()),
                             );
                           }
                           final docs = snapshot.data!.docs;
@@ -439,13 +449,17 @@ class _HomePageState extends State<HomePage> {
                   );
                 }
               },
-              backgroundColor: Colors.blue,
-              child: const Icon(Icons.add, color: Colors.white),
+              backgroundColor: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.blue
+                  : Theme.of(context).colorScheme.primary,
+              child: Icon(Icons.add, color: Theme.of(context).iconTheme.color),
             ),
 
             // 하단 네비게이션
             bottomNavigationBar: BottomAppBar(
-              color: Colors.white,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.black
+                  : Colors.white,
               height: 80,
               child: Padding(
                 padding: const EdgeInsets.symmetric(
@@ -521,6 +535,9 @@ class _HomePageState extends State<HomePage> {
                         "assets/image/profile.png",
                         width: 64,
                         height: 64,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white
+                            : null,
                       ),
                     ),
                   ],
@@ -536,36 +553,64 @@ class _HomePageState extends State<HomePage> {
 
 Widget _buildExpenseItem(int amount, String category, DateTime date) {
   final isIncome = amount > 0;
-  return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 4.0),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                category,
-                style: const TextStyle(fontSize: 14),
-                overflow: TextOverflow.ellipsis,
-              ),
-              Text(
-                "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}",
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-            ],
+  return Builder(
+    builder: (context) => Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  category,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Theme.of(context).textTheme.bodyMedium?.color,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}",
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.color?.withOpacity(0.7),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-        Text(
-          isIncome ? "+${amount.abs()}원" : "-${amount.abs()}원",
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: isIncome ? Colors.blue : Colors.red,
+          Text(
+            isIncome ? "+${amount.abs()}원" : "-${amount.abs()}원",
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: isIncome
+                  ? (Theme.of(context).brightness == Brightness.dark
+                        ? Colors.blue
+                        : Theme.of(context).colorScheme.primary)
+                  : Theme.of(context).colorScheme.error,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     ),
   );
+}
+
+class _NoExpenseText extends StatelessWidget {
+  const _NoExpenseText();
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      "지출 내역이 없습니다.",
+      style: TextStyle(
+        fontSize: 16,
+        color: Theme.of(context).textTheme.bodyMedium?.color,
+      ),
+    );
+  }
 }

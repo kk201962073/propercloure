@@ -46,11 +46,15 @@ class _GuitarPageState extends State<GuitarPage> {
       body: Column(
         children: [
           Container(
-            color: Colors.red,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.orange
+                : Colors.orange,
             child: Container(
               width: double.infinity,
               height: 200,
-              color: Colors.red,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.orange
+                  : Colors.orange,
               child: Stack(
                 children: [
                   SafeArea(
@@ -64,14 +68,16 @@ class _GuitarPageState extends State<GuitarPage> {
                             icon: const Icon(Icons.arrow_back),
                             onPressed: () => Navigator.pop(context),
                           ),
-                          const Expanded(
+                          Expanded(
                             child: Center(
                               child: Text(
                                 "기타",
                                 style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.w600,
-                                  color: Colors.black,
+                                  color: Theme.of(
+                                    context,
+                                  ).textTheme.bodyLarge?.color,
                                 ),
                               ),
                             ),
@@ -91,10 +97,12 @@ class _GuitarPageState extends State<GuitarPage> {
                         Consumer<GuitarViewModel>(
                           builder: (context, vm, _) => Text(
                             "${NumberFormat('#,###').format(vm.guitarTransactions.fold<int>(0, (sum, tx) => sum + tx.amount.toInt()))}원",
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black,
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyLarge?.color,
                             ),
                           ),
                         ),
@@ -112,9 +120,11 @@ class _GuitarPageState extends State<GuitarPage> {
                       child: Consumer<GuitarViewModel>(
                         builder: (context, vm, _) => Text(
                           vm.isAscending ? "날짜↑" : "날짜↓",
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
-                            color: Colors.black54,
+                            color: Theme.of(
+                              context,
+                            ).textTheme.bodyMedium?.color?.withOpacity(0.7),
                           ),
                         ),
                       ),
@@ -127,7 +137,7 @@ class _GuitarPageState extends State<GuitarPage> {
           Expanded(
             child: SafeArea(
               child: Container(
-                color: Colors.white,
+                color: Theme.of(context).scaffoldBackgroundColor,
                 child: Consumer<GuitarViewModel>(
                   builder: (context, vm, _) {
                     final guitarList = vm.guitarTransactionsSorted;
@@ -135,10 +145,15 @@ class _GuitarPageState extends State<GuitarPage> {
                       "[GuitarPage] Consumer 빌드됨, 기타 내역 개수: ${vm.guitarTransactionsSorted.length}",
                     );
                     if (guitarList.isEmpty) {
-                      return const Center(
+                      return Center(
                         child: Text(
                           "기타 내역이 없습니다.",
-                          style: TextStyle(color: Colors.black45, fontSize: 16),
+                          style: TextStyle(
+                            color: Theme.of(
+                              context,
+                            ).textTheme.bodyMedium?.color?.withOpacity(0.6),
+                            fontSize: 16,
+                          ),
                         ),
                       );
                     }
@@ -154,20 +169,35 @@ class _GuitarPageState extends State<GuitarPage> {
                             (tx.title.isEmpty || tx.title == "제목 없음")
                                 ? tx.category
                                 : tx.title,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style:
+                                const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ).copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).textTheme.bodyLarge?.color,
+                                ),
                           ),
                           subtitle: Text(
                             DateFormat('yyyy-MM-dd HH:mm').format(tx.date),
+                            style: TextStyle(
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                            ),
                           ),
                           trailing: Text(
                             "${NumberFormat('#,###').format(tx.amount)}원",
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style:
+                                const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ).copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).textTheme.bodyLarge?.color,
+                                ),
                           ),
                         );
                       },

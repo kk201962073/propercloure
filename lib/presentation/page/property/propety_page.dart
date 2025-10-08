@@ -23,14 +23,14 @@ class PropertyPage extends StatelessWidget {
     return '${amount < 0 ? '-' : ''}${buffer.toString()}원';
   }
 
-  Widget _buildAssetCard(String title, String amount) {
+  Widget _buildAssetCard(BuildContext context, String title, String amount) {
     Color amountColor;
-    if (title == "지출") {
-      amountColor = Colors.red;
-    } else if (amount.startsWith('-')) {
+    if (title == "지출" || amount.startsWith('-')) {
       amountColor = Colors.red;
     } else if (amount != "0원") {
-      amountColor = Colors.blue;
+      amountColor = Theme.of(context).brightness == Brightness.dark
+          ? Colors.blue
+          : Theme.of(context).colorScheme.primary;
     } else {
       amountColor = Colors.grey;
     }
@@ -39,7 +39,7 @@ class PropertyPage extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 6),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: Colors.black,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
@@ -54,7 +54,10 @@ class PropertyPage extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(color: Colors.white, fontSize: 16),
+            style: TextStyle(
+              color: Theme.of(context).textTheme.bodyLarge?.color,
+              fontSize: 16,
+            ),
           ),
           Text(
             amount,
@@ -72,7 +75,7 @@ class PropertyPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -83,10 +86,15 @@ class PropertyPage extends StatelessWidget {
             );
           },
         ),
-        title: const Text("자산"),
+        title: Text(
+          "자산",
+          style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
+        ),
         centerTitle: true,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        foregroundColor:
+            Theme.of(context).appBarTheme.foregroundColor ??
+            Theme.of(context).textTheme.bodyLarge?.color,
         elevation: 0,
       ),
       body: Padding(
@@ -107,13 +115,20 @@ class PropertyPage extends StatelessWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text("총 자산", style: TextStyle(fontSize: 14)),
+                Text(
+                  "총 자산",
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
+                  ),
+                ),
                 const SizedBox(height: 4),
                 Text(
                   _formatAmount(total),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -122,18 +137,20 @@ class PropertyPage extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       "내역",
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                       ),
                     ),
                     Text(
                       _formatAmount(total),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                       ),
                     ),
                   ],
@@ -148,7 +165,7 @@ class PropertyPage extends StatelessWidget {
                       ),
                     );
                   },
-                  child: _buildAssetCard("수입", _formatAmount(income)),
+                  child: _buildAssetCard(context, "수입", _formatAmount(income)),
                 ),
                 GestureDetector(
                   onTap: () {
@@ -159,7 +176,7 @@ class PropertyPage extends StatelessWidget {
                       ),
                     );
                   },
-                  child: _buildAssetCard("지출", _formatAmount(expense)),
+                  child: _buildAssetCard(context, "지출", _formatAmount(expense)),
                 ),
                 GestureDetector(
                   onTap: () {
@@ -170,7 +187,7 @@ class PropertyPage extends StatelessWidget {
                       ),
                     );
                   },
-                  child: _buildAssetCard("기타", _formatAmount(others)),
+                  child: _buildAssetCard(context, "기타", _formatAmount(others)),
                 ),
               ],
             );

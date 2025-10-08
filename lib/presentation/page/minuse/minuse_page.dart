@@ -29,11 +29,15 @@ class _MinusePageState extends State<MinusePage> {
       body: Column(
         children: [
           Container(
-            color: const Color.fromARGB(255, 194, 150, 5),
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.red
+                : Colors.red,
             child: Container(
               width: double.infinity,
               height: 200,
-              color: const Color.fromARGB(255, 194, 150, 5),
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.red
+                  : Colors.red,
               child: Stack(
                 children: [
                   SafeArea(
@@ -47,14 +51,16 @@ class _MinusePageState extends State<MinusePage> {
                             icon: const Icon(Icons.arrow_back),
                             onPressed: () => Navigator.pop(context),
                           ),
-                          const Expanded(
+                          Expanded(
                             child: Center(
                               child: Text(
                                 "지출",
                                 style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.w600,
-                                  color: Colors.black,
+                                  color: Theme.of(
+                                    context,
+                                  ).textTheme.bodyLarge?.color,
                                 ),
                               ),
                             ),
@@ -74,10 +80,12 @@ class _MinusePageState extends State<MinusePage> {
                         Consumer<MinuseViewModel>(
                           builder: (context, vm, _) => Text(
                             "${NumberFormat('#,###').format(vm.expenseTotal)}원",
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black,
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyLarge?.color,
                             ),
                           ),
                         ),
@@ -95,9 +103,11 @@ class _MinusePageState extends State<MinusePage> {
                       child: Consumer<MinuseViewModel>(
                         builder: (context, vm, _) => Text(
                           vm.isAscending ? "날짜↑" : "날짜↓",
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
-                            color: Colors.black54,
+                            color: Theme.of(
+                              context,
+                            ).textTheme.bodyMedium?.color?.withOpacity(0.7),
                           ),
                         ),
                       ),
@@ -110,17 +120,22 @@ class _MinusePageState extends State<MinusePage> {
           Expanded(
             child: SafeArea(
               child: Container(
-                color: Colors.white,
+                color: Theme.of(context).scaffoldBackgroundColor,
                 child: Consumer<MinuseViewModel>(
                   builder: (context, vm, _) {
                     final expenseList = vm.expenseTransactions
                         .where((tx) => tx.category != "기타")
                         .toList();
                     if (expenseList.isEmpty) {
-                      return const Center(
+                      return Center(
                         child: Text(
                           "지출 내역이 없습니다.",
-                          style: TextStyle(color: Colors.black45, fontSize: 16),
+                          style: TextStyle(
+                            color: Theme.of(
+                              context,
+                            ).textTheme.bodyMedium?.color?.withOpacity(0.6),
+                            fontSize: 16,
+                          ),
                         ),
                       );
                     }
@@ -131,19 +146,30 @@ class _MinusePageState extends State<MinusePage> {
                         return ListTile(
                           title: Text(
                             tx.category,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyLarge?.color,
                             ),
                           ),
                           subtitle: Text(
                             DateFormat('yyyy-MM-dd HH:mm').format(tx.date),
+                            style: TextStyle(
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                            ),
                           ),
                           trailing: Text(
                             "${NumberFormat('#,###').format(tx.amount)}원",
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyLarge?.color,
                             ),
                           ),
                         );
