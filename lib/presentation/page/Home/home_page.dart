@@ -52,7 +52,6 @@ class _HomePageState extends State<HomePage> {
                       children: [
                         GestureDetector(
                           onTap: () async {
-                            // 1. 연도 선택 다이얼로그 표시
                             final int? selectedYear = await showDialog<int>(
                               context: context,
                               builder: (context) {
@@ -72,7 +71,7 @@ class _HomePageState extends State<HomePage> {
                               },
                             );
                             if (selectedYear == null) return;
-                            // 2. 월 선택 다이얼로그 표시
+
                             final int? selectedMonth = await showDialog<int>(
                               context: context,
                               builder: (context) {
@@ -92,7 +91,7 @@ class _HomePageState extends State<HomePage> {
                               },
                             );
                             if (selectedMonth == null) return;
-                            // ViewModel에 연도와 월을 업데이트
+
                             viewModel.setYear(selectedYear);
                             viewModel.setMonth(selectedMonth);
                           },
@@ -117,7 +116,6 @@ class _HomePageState extends State<HomePage> {
                             ],
                           ),
                         ),
-                        // 총 합계는 아래 StreamBuilder에서 계산된 값을 사용하도록 교체됨
                         StreamBuilder<QuerySnapshot>(
                           stream: FirebaseFirestore.instance
                               .collection('transactions')
@@ -186,7 +184,8 @@ class _HomePageState extends State<HomePage> {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    // 월간 수입/지출 요약 (달력 위)
+
+                    // 월간 수입/지출 요약
                     StreamBuilder<QuerySnapshot>(
                       stream: FirebaseFirestore.instance
                           .collection('transactions')
@@ -239,7 +238,6 @@ class _HomePageState extends State<HomePage> {
                             }
                           }
                         }
-                        // monthlyBalance is available here if needed
                         return Row(
                           children: [
                             Text(
@@ -275,9 +273,8 @@ class _HomePageState extends State<HomePage> {
                       firstDay: DateTime.utc(2020, 1, 1),
                       lastDay: DateTime.utc(2030, 12, 31),
                       headerVisible: false,
-                      selectedDayPredicate: (day) {
-                        return isSameDay(day, selectedDay);
-                      },
+                      selectedDayPredicate: (day) =>
+                          isSameDay(day, selectedDay),
                       onDaySelected: (selectedDay, focusedDay) {
                         viewModel.setSelectedDay(selectedDay);
                       },
@@ -301,7 +298,7 @@ class _HomePageState extends State<HomePage> {
 
                     const SizedBox(height: 50),
 
-                    // 지출 내역 - Firestore StreamBuilder (실시간 반영) + 월간 수입/지출 계산
+                    // 지출 내역
                     Expanded(
                       child: StreamBuilder<QuerySnapshot>(
                         stream: FirebaseFirestore.instance
@@ -316,10 +313,10 @@ class _HomePageState extends State<HomePage> {
                           }
                           if (!snapshot.hasData ||
                               snapshot.data!.docs.isEmpty) {
-                            return const Expanded(
-                              child: Center(child: _NoExpenseText()),
-                            );
+                            // 🔧 ParentDataWidget 오류 수정됨 (Expanded 제거)
+                            return const Center(child: _NoExpenseText());
                           }
+
                           final docs = snapshot.data!.docs;
 
                           final List<Map<String, dynamic>> sortedTransactions =
@@ -338,40 +335,33 @@ class _HomePageState extends State<HomePage> {
                                 } else {
                                   date = DateTime.now();
                                 }
-                                return {...data, 'date': date};
+                                return {...data, 'date': date, 'id': doc.id};
                               }).toList()..sort(
                                 (a, b) => (a['date'] as DateTime).compareTo(
                                   b['date'] as DateTime,
                                 ),
                               );
 
-                          return Column(
-                            children: [
-                              // 지출 내역 리스트
-                              Expanded(
-                                child: ListView.builder(
-                                  itemCount: sortedTransactions.length,
-                                  itemBuilder: (context, index) {
-                                    final tx = sortedTransactions[index];
-                                    final DateTime txDate =
-                                        tx['date'] as DateTime;
-                                    final int amount = (tx['amount'] is int)
-                                        ? tx['amount'] as int
-                                        : int.tryParse(
-                                                tx['amount']?.toString() ?? '0',
-                                              ) ??
-                                              0;
-                                    final String category =
-                                        tx['category']?.toString() ?? '기타';
-                                    return _buildExpenseItem(
-                                      amount,
-                                      category,
-                                      txDate,
-                                    );
-                                  },
-                                ),
-                              ),
-                            ],
+                          return ListView.builder(
+                            itemCount: sortedTransactions.length,
+                            itemBuilder: (context, index) {
+                              final tx = sortedTransactions[index];
+                              final DateTime txDate = tx['date'] as DateTime;
+                              final int amount = (tx['amount'] is int)
+                                  ? tx['amount'] as int
+                                  : int.tryParse(
+                                          tx['amount']?.toString() ?? '0',
+                                        ) ??
+                                        0;
+                              final String category =
+                                  tx['category']?.toString() ?? '기타';
+                              return _buildExpenseItem(
+                                tx['id'],
+                                amount,
+                                category,
+                                txDate,
+                              );
+                            },
                           );
                         },
                       ),
@@ -384,7 +374,6 @@ class _HomePageState extends State<HomePage> {
             // 플로팅 버튼
             floatingActionButton: FloatingActionButton(
               onPressed: () async {
-                debugPrint('Navigating to AddPage...');
                 final result = await Navigator.push<Map<String, dynamic>?>(
                   context,
                   MaterialPageRoute(
@@ -394,12 +383,7 @@ class _HomePageState extends State<HomePage> {
 
                 if (!context.mounted) return;
 
-                debugPrint('Returned from AddPage with result: $result');
-
                 if (result != null) {
-                  debugPrint('Result keys: ${result.keys}');
-                  debugPrint('Result values: $result');
-
                   final dynamic titleDynamic = result['title'];
                   final String title = titleDynamic is String
                       ? titleDynamic
@@ -431,11 +415,6 @@ class _HomePageState extends State<HomePage> {
                       date = DateTime.parse(dateDynamic);
                     } catch (_) {}
                   }
-
-                  debugPrint('Parsed Title: $title');
-                  debugPrint('Parsed Amount: $amount');
-                  debugPrint('Parsed Category: $category');
-                  debugPrint('Parsed Date: $date');
 
                   final safeTitle = title.isNotEmpty ? title : '제목 없음';
                   final safeCategory = category.isNotEmpty ? category : '기타';
@@ -551,7 +530,12 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-Widget _buildExpenseItem(int amount, String category, DateTime date) {
+Widget _buildExpenseItem(
+  String docId,
+  int amount,
+  String category,
+  DateTime date,
+) {
   final isIncome = amount > 0;
   return Builder(
     builder: (context) => Padding(
@@ -594,6 +578,35 @@ Widget _buildExpenseItem(int amount, String category, DateTime date) {
                         : Theme.of(context).colorScheme.primary)
                   : Theme.of(context).colorScheme.error,
             ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete, color: Colors.red),
+            onPressed: () async {
+              final confirm = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('삭제 확인'),
+                  content: const Text('삭제하시겠습니까?'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: const Text('취소'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      child: const Text('삭제'),
+                    ),
+                  ],
+                ),
+              );
+
+              if (confirm == true) {
+                await FirebaseFirestore.instance
+                    .collection('transactions')
+                    .doc(docId)
+                    .delete();
+              }
+            },
           ),
         ],
       ),
