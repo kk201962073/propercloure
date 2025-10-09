@@ -138,7 +138,7 @@ class HomeHeaderWidget extends StatelessWidget {
 
               // 총 합계 표시
               Text(
-                '총 합계: ${(monthlyIncome + monthlyExpense).toString()}원',
+                '총 합계 ${(monthlyIncome + monthlyExpense).toString()}원',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
