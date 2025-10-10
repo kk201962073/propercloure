@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:propercloure/presentation/page/Home/home_view_model.dart';
+import 'package:provider/provider.dart';
 
 class HomeHeaderWidget extends StatelessWidget {
-  final HomeViewModel viewModel;
+  const HomeHeaderWidget({super.key});
 
-  const HomeHeaderWidget({super.key, required this.viewModel});
-
-  Future<void> _showYearMonthPicker(BuildContext context) async {
+  Future<void> _showYearMonthPicker(
+    BuildContext context,
+    HomeViewModel viewModel,
+  ) async {
     // 연도 선택
     int? selectedYear = await showDialog<int>(
       context: context,
@@ -65,13 +68,21 @@ class HomeHeaderWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = Provider.of<HomeViewModel>(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDark ? Colors.white : Colors.black;
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+
+    if (uid == null) {
+      return const SizedBox.shrink();
+    }
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
       child: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
             .collection('transactions')
             .snapshots(),
         builder: (context, snapshot) {
@@ -115,7 +126,7 @@ class HomeHeaderWidget extends StatelessWidget {
                   GestureDetector(
                     onTap: () {
                       if (!context.mounted) return;
-                      _showYearMonthPicker(context);
+                      _showYearMonthPicker(context, viewModel);
                     },
                     child: Row(
                       children: [

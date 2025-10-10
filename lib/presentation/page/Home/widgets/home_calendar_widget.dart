@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:propercloure/presentation/page/Home/home_view_model.dart';
+import 'package:provider/provider.dart';
 
 class HomeCalendarWidget extends StatelessWidget {
-  final HomeViewModel viewModel;
-
-  const HomeCalendarWidget({Key? key, required this.viewModel})
-    : super(key: key);
+  const HomeCalendarWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = Provider.of<HomeViewModel>(context);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 

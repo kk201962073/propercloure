@@ -48,55 +48,66 @@ class HomeViewModel extends ChangeNotifier {
     return List.generate(11, (index) => currentYear - 5 + index);
   }
 
-  void loadTransactions(PropertyViewModel propertyViewModel) {
-    _firestore.collection('transactions').snapshots().listen((querySnapshot) {
-      try {
-        transactions = querySnapshot.docs.map<Map<String, dynamic>>((doc) {
-          final data = doc.data();
-          final rawAmount = data['amount'];
-          int parsedAmount = 0;
-          if (rawAmount is int) {
-            parsedAmount = rawAmount;
-          } else if (rawAmount is String) {
-            parsedAmount = int.tryParse(rawAmount) ?? 0;
+  void loadTransactions(String uid, PropertyViewModel propertyViewModel) {
+    _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('transactions')
+        .snapshots()
+        .listen((querySnapshot) {
+          try {
+            transactions = querySnapshot.docs.map<Map<String, dynamic>>((doc) {
+              final data = doc.data();
+              final rawAmount = data['amount'];
+              int parsedAmount = 0;
+              if (rawAmount is int) {
+                parsedAmount = rawAmount;
+              } else if (rawAmount is String) {
+                parsedAmount = int.tryParse(rawAmount) ?? 0;
+              }
+              return {
+                'id': doc.id,
+                'title': data['title'] ?? '',
+                'amount': parsedAmount,
+                'category': data['category'] ?? '',
+                'date': data['date'] != null
+                    ? DateTime.tryParse(data['date'].toString()) ??
+                          DateTime.now()
+                    : DateTime.now(),
+              };
+            }).toList();
+            debugPrint(
+              "[HomeViewModel] Transactions loaded: ${transactions.length}",
+            );
+            propertyViewModel.setRecords(transactions);
+            debugPrint(
+              "[HomeViewModel] setRecords 호출됨. 길이: ${transactions.length}",
+            );
+            notifyListeners();
+          } catch (e, st) {
+            debugPrint("[HomeViewModel] Error parsing transactions: $e\n$st");
           }
-          return {
-            'id': doc.id,
-            'title': data['title'] ?? '',
-            'amount': parsedAmount,
-            'category': data['category'] ?? '',
-            'date': data['date'] != null
-                ? DateTime.tryParse(data['date'].toString()) ?? DateTime.now()
-                : DateTime.now(),
-          };
-        }).toList();
-        debugPrint(
-          "[HomeViewModel] Transactions loaded: ${transactions.length}",
-        );
-        propertyViewModel.setRecords(transactions);
-        debugPrint(
-          "[HomeViewModel] setRecords 호출됨. 길이: ${transactions.length}",
-        );
-        notifyListeners();
-      } catch (e, st) {
-        debugPrint("[HomeViewModel] Error parsing transactions: $e\n$st");
-      }
-    });
+        });
   }
 
   Future<void> addTransaction(
+    String uid,
     String title,
     int amount,
     String category,
     DateTime date,
   ) async {
     try {
-      final docRef = await _firestore.collection('transactions').add({
-        'title': title,
-        'amount': amount,
-        'category': category,
-        'date': date.toIso8601String(),
-      });
+      final docRef = await _firestore
+          .collection('users')
+          .doc(uid)
+          .collection('transactions')
+          .add({
+            'title': title,
+            'amount': amount,
+            'category': category,
+            'date': date.toIso8601String(),
+          });
       transactions.add({
         'id': docRef.id,
         'title': title,

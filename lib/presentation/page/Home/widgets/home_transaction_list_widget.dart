@@ -1,17 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:propercloure/presentation/page/Home/home_view_model.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class HomeTransactionListWidget extends StatelessWidget {
-  final HomeViewModel viewModel;
-
-  const HomeTransactionListWidget({Key? key, required this.viewModel})
-    : super(key: key);
+  const HomeTransactionListWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+
+    if (uid == null) {
+      return const Center(
+        child: Text("사용자 인증이 필요합니다.", style: TextStyle(fontSize: 16)),
+      );
+    }
+
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('transactions').snapshots(),
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .collection('transactions')
+          .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -162,6 +171,8 @@ class HomeTransactionListWidget extends StatelessWidget {
 
                       if (confirm == true) {
                         await FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(uid)
                             .collection('transactions')
                             .doc(docId)
                             .delete();

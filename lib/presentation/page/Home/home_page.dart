@@ -6,6 +6,7 @@ import 'package:propercloure/presentation/page/add/add_page.dart';
 import 'package:propercloure/presentation/page/property/propety_page.dart';
 import 'package:propercloure/presentation/page/profile/profile_page.dart';
 import 'package:propercloure/presentation/page/ai/ai_page.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
 import 'widgets/home_header_widget.dart';
 import 'widgets/home_calendar_widget.dart';
 import 'widgets/home_transaction_list_widget.dart';
@@ -29,7 +30,10 @@ class _HomePageState extends State<HomePage> {
         context,
         listen: false,
       );
-      homeViewModel.loadTransactions(propertyViewModel);
+      final user = fb_auth.FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        homeViewModel.loadTransactions(user.uid, propertyViewModel);
+      }
     });
   }
 
@@ -46,13 +50,13 @@ class _HomePageState extends State<HomePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                HomeHeaderWidget(viewModel: viewModel),
+                const HomeHeaderWidget(),
                 const SizedBox(height: 16),
-                HomeCalendarWidget(viewModel: viewModel),
+                const HomeCalendarWidget(),
                 const SizedBox(height: 50),
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 0.40,
-                  child: HomeTransactionListWidget(viewModel: viewModel),
+                  child: const HomeTransactionListWidget(),
                 ),
               ],
             ),
@@ -107,12 +111,16 @@ class _HomePageState extends State<HomePage> {
             final safeCategory = category.isNotEmpty ? category : '기타';
 
             viewModel.setSelectedDay(date);
-            await viewModel.addTransaction(
-              safeTitle,
-              amount,
-              safeCategory,
-              date,
-            );
+            final user = fb_auth.FirebaseAuth.instance.currentUser;
+            if (user != null) {
+              await viewModel.addTransaction(
+                user.uid,
+                safeTitle,
+                amount,
+                safeCategory,
+                date,
+              );
+            }
           }
         },
         backgroundColor: Theme.of(context).brightness == Brightness.dark
