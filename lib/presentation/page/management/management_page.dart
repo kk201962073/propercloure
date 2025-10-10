@@ -64,9 +64,9 @@ class _ManagementPageState extends State<ManagementPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Move the existing Scaffold build code here (currently below in ManagementPage)
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? Colors.black : Colors.white,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -74,8 +74,8 @@ class _ManagementPageState extends State<ManagementPage> {
         ),
         title: const Text("프로필 관리"),
         centerTitle: true,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: isDark ? Colors.black : Colors.white,
+        foregroundColor: isDark ? Colors.white : Colors.black,
         elevation: 0,
       ),
       body: Padding(
@@ -87,7 +87,7 @@ class _ManagementPageState extends State<ManagementPage> {
             const SizedBox(height: 40),
             CircleAvatar(
               radius: 40,
-              backgroundColor: Colors.white,
+              backgroundColor: isDark ? Colors.grey[800] : Colors.white,
               backgroundImage: _photoUrl.isNotEmpty
                   ? NetworkImage(_photoUrl)
                   : const AssetImage("assets/image/logo.png") as ImageProvider,
@@ -99,16 +99,23 @@ class _ManagementPageState extends State<ManagementPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     "닉네임",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: isDark ? Colors.white : null,
+                    ),
                   ),
                   const SizedBox(width: 20),
                   Flexible(
                     child: TextField(
                       controller: _nicknameController,
                       readOnly: !_isEditing,
-                      style: const TextStyle(fontSize: 16),
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: isDark ? Colors.white : null,
+                      ),
                       decoration: const InputDecoration(
                         border: InputBorder.none,
                         isDense: true,
@@ -126,16 +133,23 @@ class _ManagementPageState extends State<ManagementPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     "이메일",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: isDark ? Colors.white : null,
+                    ),
                   ),
                   const SizedBox(width: 20),
                   Flexible(
                     child: TextField(
                       controller: _emailController,
                       readOnly: !_isEditing,
-                      style: const TextStyle(fontSize: 16),
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: isDark ? Colors.white : null,
+                      ),
                       decoration: const InputDecoration(
                         border: InputBorder.none,
                         isDense: true,
@@ -152,10 +166,13 @@ class _ManagementPageState extends State<ManagementPage> {
               height: 50,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.lightGreen,
+                  backgroundColor: isDark
+                      ? (_isEditing ? Colors.grey : Colors.blueAccent)
+                      : Colors.lightGreen,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
+                  foregroundColor: Colors.white,
                 ),
                 onPressed: () {
                   setState(() {
@@ -174,10 +191,13 @@ class _ManagementPageState extends State<ManagementPage> {
               height: 50,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
+                  backgroundColor: isDark
+                      ? (_isEditing ? Colors.blueAccent : Colors.tealAccent)
+                      : Colors.black,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
+                  foregroundColor: Colors.white,
                 ),
                 onPressed: _isEditing
                     ? () async => await _saveUserData()
