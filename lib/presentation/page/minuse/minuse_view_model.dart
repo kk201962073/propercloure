@@ -9,9 +9,20 @@ class MinuseViewModel extends ChangeNotifier {
   List<TransactionState> get expenseTransactions =>
       _transactions.where((tx) => tx.amount < 0).toList();
 
-  int get expenseTotal => expenseTransactions
-      .where((tx) => tx.category != "기타")
-      .fold(0, (sum, tx) => sum + tx.amount.abs().toInt());
+  int get expenseTotal {
+    // 중복 제거 (id 기준)
+    final uniqueTx = <String, TransactionState>{};
+    for (final tx in expenseTransactions) {
+      uniqueTx[tx.id] = tx;
+    }
+
+    // 총합 계산 (기타 제외, 중복 제거 후)
+    final result = uniqueTx.values
+        .where((tx) => tx.category != "기타")
+        .fold(0, (sum, tx) => sum + tx.amount.abs().toInt());
+
+    return result;
+  }
 
   //날짜 오름차순 (과거 → 최신)
   List<TransactionState> get expenseTransactionsByDateAsc {

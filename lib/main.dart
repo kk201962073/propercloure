@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:propercloure/presentation/page/guitar/guitat_view_model.dart';
+import 'package:propercloure/presentation/page/guitar/guitar_view_model.dart';
 import 'package:propercloure/presentation/page/Home/home_view_model.dart';
 import 'package:propercloure/presentation/page/minuse/minuse_view_model.dart';
 import 'package:propercloure/presentation/page/property/propety_viwe_model.dart';

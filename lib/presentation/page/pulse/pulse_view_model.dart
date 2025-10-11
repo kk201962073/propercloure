@@ -10,9 +10,18 @@ class PulseViewModel extends ChangeNotifier {
       .where((tx) => tx.category == "수입" || tx.amount > 0)
       .toList();
 
-  int get incomeTotal => incomeTransactions
-      .where((tx) => tx.category != "기타")
-      .fold(0, (sum, tx) => sum + tx.amount.toInt());
+  int get incomeTotal {
+    // id 기준 중복 제거
+    final uniqueTx = <String, TransactionState>{};
+    for (final tx in _transactions) {
+      uniqueTx[tx.id] = tx;
+    }
+
+    // 수입만 합산 (기타 제외)
+    return uniqueTx.values
+        .where((tx) => tx.amount > 0 && tx.category != "기타")
+        .fold(0, (sum, tx) => sum + tx.amount.toInt());
+  }
 
   //날짜 오름차순 (과거 → 최신)
   List<TransactionState> get incomeTransactionsByDateAsc {
@@ -38,6 +47,9 @@ class PulseViewModel extends ChangeNotifier {
 
   void setTransactions(List<dynamic> newTx) {
     _transactions.clear();
+    debugPrint(
+      "[PulseViewModel] Transactions reset. New count: ${_transactions.length}",
+    );
     _transactions.addAll(
       newTx.map((tx) {
         if (tx is TransactionState) {

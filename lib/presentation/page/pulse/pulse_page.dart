@@ -12,11 +12,15 @@ class PlusePage extends StatefulWidget {
 }
 
 class _PlusePageState extends State<PlusePage> {
+  bool _initialized = false;
   @override
   void initState() {
     super.initState();
     // 홈에서 불러온 거래 목록을 PulseViewModel로 복사
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_initialized) return;
+      _initialized = true;
+
       final homeVM = context.read<HomeViewModel>();
       final pulseVM = context.read<PulseViewModel>();
       pulseVM.setTransactions(homeVM.transactions);
@@ -124,7 +128,13 @@ class _PlusePageState extends State<PlusePage> {
                 child: Consumer<PulseViewModel>(
                   builder: (context, vm, _) {
                     final incomeList = vm.incomeTransactions
-                        .where((tx) => tx.category != "기타")
+                        .where((tx) => tx.amount > 0 && tx.category != "기타")
+                        .toList()
+                        .fold<Map<String, dynamic>>({}, (map, tx) {
+                          map[tx.id] = tx;
+                          return map;
+                        })
+                        .values
                         .toList();
                     if (incomeList.isEmpty) {
                       return Center(

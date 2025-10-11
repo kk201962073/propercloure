@@ -1,7 +1,7 @@
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:propercloure/presentation/page/Home/home_pagestate.dart';
-import 'package:propercloure/presentation/page/guitar/guitat_view_model.dart';
+import 'package:propercloure/presentation/page/guitar/guitar_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:propercloure/presentation/page/Home/home_view_model.dart';
 
@@ -13,14 +13,19 @@ class GuitarPage extends StatefulWidget {
 }
 
 class _GuitarPageState extends State<GuitarPage> {
+  bool _initialized = false;
   @override
   void initState() {
     super.initState();
     // 홈에서 불러온 거래 목록을 GuitarViewModel로 복사
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_initialized) return;
+      _initialized = true;
+
       final homeVM = context.read<HomeViewModel>();
       final guitarVM = context.read<GuitarViewModel>();
       print("[GuitarPage] 홈 트랜잭션 불러오기, 개수: ${homeVM.transactions.length}");
+
       final txList = homeVM.transactions
           .map((tx) {
             print("[GuitarPage] 원본 tx: $tx");
@@ -34,6 +39,7 @@ class _GuitarPageState extends State<GuitarPage> {
             return result;
           })
           .toList();
+
       print("[GuitarPage] 기타 카테고리 tx 개수: ${txList.length}");
       guitarVM.setTransactions(txList);
     });
@@ -140,7 +146,13 @@ class _GuitarPageState extends State<GuitarPage> {
                 color: Theme.of(context).scaffoldBackgroundColor,
                 child: Consumer<GuitarViewModel>(
                   builder: (context, vm, _) {
-                    final guitarList = vm.guitarTransactionsSorted;
+                    final guitarList = vm.guitarTransactionsSorted
+                        .fold<Map<String, dynamic>>({}, (map, tx) {
+                          map[tx.id] = tx;
+                          return map;
+                        })
+                        .values
+                        .toList();
                     print(
                       "[GuitarPage] Consumer 빌드됨, 기타 내역 개수: ${vm.guitarTransactionsSorted.length}",
                     );

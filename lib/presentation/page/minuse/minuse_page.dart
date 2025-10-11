@@ -12,11 +12,15 @@ class MinusePage extends StatefulWidget {
 }
 
 class _MinusePageState extends State<MinusePage> {
+  bool _initialized = false;
   @override
   void initState() {
     super.initState();
     // 홈에서 불러온 거래 목록을 PulseViewModel로 복사
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_initialized) return;
+      _initialized = true;
+
       final homeVM = context.read<HomeViewModel>();
       final pulseVM = context.read<MinuseViewModel>();
       pulseVM.setTransactions(homeVM.transactions);
@@ -125,6 +129,12 @@ class _MinusePageState extends State<MinusePage> {
                   builder: (context, vm, _) {
                     final expenseList = vm.expenseTransactions
                         .where((tx) => tx.category != "기타")
+                        .toList()
+                        .fold<Map<String, dynamic>>({}, (map, tx) {
+                          map[tx.id] = tx;
+                          return map;
+                        })
+                        .values
                         .toList();
                     if (expenseList.isEmpty) {
                       return Center(
