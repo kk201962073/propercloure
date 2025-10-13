@@ -60,7 +60,10 @@ class _ProfilePageState extends State<ProfilePage> {
                     children: [
                       CircleAvatar(
                         radius: 40,
-                        backgroundColor: Colors.white,
+                        backgroundColor:
+                            Theme.of(context).brightness == Brightness.dark
+                            ? const Color(0xFF2C2C2C)
+                            : Colors.white,
                         backgroundImage: const AssetImage(
                           "assets/image/logo.png",
                         ),
@@ -92,7 +95,10 @@ class _ProfilePageState extends State<ProfilePage> {
                   children: [
                     CircleAvatar(
                       radius: 40,
-                      backgroundColor: Colors.white,
+                      backgroundColor:
+                          Theme.of(context).brightness == Brightness.dark
+                          ? const Color(0xFF2C2C2C)
+                          : Colors.white,
                       backgroundImage: photoUrl != null && photoUrl.isNotEmpty
                           ? NetworkImage(photoUrl)
                           : const AssetImage("assets/image/logo.png")
