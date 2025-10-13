@@ -88,25 +88,27 @@ class LoginPage extends StatelessWidget {
                     padding: EdgeInsets.zero,
                     child: GestureDetector(
                       onTap: () async {
-                        try {
-                          await appleLoginVM.signInWithApple();
+                        final user = await appleLoginVM.signInWithApple();
+                        if (user != null) {
                           // 로그인 성공 → HomePage로 이동
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(builder: (_) => const HomePage()),
                           );
-                        } catch (e) {
-                          // 로그인 실패
+                        } else {
+                          // 로그인 실패 → 현재 페이지에 머물고 SnackBar 표시
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                '로그인에 실패했습니다.',
+                                '로그인에 실패했습니다. 다시 시도해주세요.',
                                 style: TextStyle(
                                   color: Theme.of(
                                     context,
                                   ).textTheme.bodyMedium?.color,
                                 ),
                               ),
+                              backgroundColor: Colors.redAccent,
+                              duration: const Duration(seconds: 2),
                             ),
                           );
                         }
