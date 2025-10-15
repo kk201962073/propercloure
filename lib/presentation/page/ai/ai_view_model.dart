@@ -14,7 +14,7 @@ class Chat {
 class AiViewModel extends Notifier<List<Chat>> {
   @override
   List<Chat> build() {
-    return [];
+    return [const Chat(content: '안녕하세요! 아래 버튼을 눌러주세요', isReceived: true)];
   }
 
   final _model = GenerativeModel(
@@ -22,12 +22,27 @@ class AiViewModel extends Notifier<List<Chat>> {
     apiKey: const String.fromEnvironment('GEMINI_API_KEY'),
   );
 
+  String _cleanMarkdown(String text) {
+    return text
+        .replaceAll(RegExp(r'[#*]+'), '') // remove markdown symbols
+        .replaceAll(RegExp(r'\s{2,}'), ' ') // clean extra spaces
+        .trim();
+  }
+
   void send(String text) async {
     state = [...state, Chat(content: text, isReceived: false)];
+    await Future.delayed(const Duration(milliseconds: 100));
+
     try {
       final result = await _model.generateContent([Content.text(text)]);
       if (result.text != null) {
-        state = [...state, Chat(content: result.text!, isReceived: true)];
+        final cleaned = _cleanMarkdown(result.text!);
+        state = [...state, Chat(content: cleaned, isReceived: true)];
+      } else {
+        state = [
+          ...state,
+          Chat(content: 'AI의 응답을 가져오지 못했습니다.', isReceived: true),
+        ];
       }
     } catch (e) {
       state = [...state, Chat(content: '오류 발생: $e', isReceived: true)];
@@ -54,20 +69,21 @@ class AiViewModel extends Notifier<List<Chat>> {
 
     final prompt =
         '''
-아래는 사용자의 소비 내역입니다. 각 카테고리별 금액을 분석하고, 
+아래는 사용자의 소비 내역입니다. 각 카테고리별 금액을 분석하고,
 수입과 지출의 균형, 절약 또는 개선 포인트를 간결하고 자연스러운 한국어로 요약해 주세요.
 
 ${buffer.toString()}
 
 출력 형식 예시:
-- 요약: 사용자는 교육비 지출이 수입보다 많아 적자가 발생했습니다. 
+- 요약: 사용자는 교육비 지출이 수입보다 많아 적자가 발생했습니다.
 - 조언: 향후 교육비 지출을 줄이거나 추가 수입원을 고려해야 합니다.
 ''';
 
     try {
       final result = await _model.generateContent([Content.text(prompt)]);
       if (result.text != null) {
-        state = [...state, Chat(content: result.text!, isReceived: true)];
+        final cleaned = _cleanMarkdown(result.text!);
+        state = [...state, Chat(content: cleaned, isReceived: true)];
       }
     } catch (e) {
       state = [...state, Chat(content: '오류 발생: $e', isReceived: true)];
