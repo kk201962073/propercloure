@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:propercloure/presentation/page/home/home_page.dart';
 import 'package:propercloure/presentation/page/ai/ai_view_model.dart';
 
 class AiPage extends ConsumerStatefulWidget {
@@ -27,10 +26,10 @@ class _AiPageState extends ConsumerState<AiPage> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const HomePage()),
-            );
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              ref.invalidate(aiViewModel); // 완전 초기화 (메시지 유지 안 됨)
+              Navigator.pop(context); // 페이지 스택에서 제거
+            });
           },
         ),
       ),
@@ -81,21 +80,21 @@ class _AiPageState extends ConsumerState<AiPage> {
                         children: [
                           ElevatedButton(
                             onPressed: () {
-                              notifier.send('피드백 해줘');
+                              notifier.analyzeTransactions();
                             },
                             child: const Text('피드백 해줘'),
                           ),
                           const SizedBox(width: 8),
                           ElevatedButton(
                             onPressed: () {
-                              notifier.send('한달 소비현황 보여줘');
+                              notifier.analyzeTransactions();
                             },
                             child: const Text('한달 소비현황 보여줘'),
                           ),
                           const SizedBox(width: 8),
                           ElevatedButton(
                             onPressed: () {
-                              notifier.send('소비패턴 분석 해줘');
+                              notifier.analyzeTransactions();
                             },
                             child: const Text('소비패턴 분석 해줘'),
                           ),
