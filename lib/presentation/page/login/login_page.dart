@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:propercloure/presentation/page/Home/home_page.dart';
+import 'package:propercloure/presentation/page/PrivacyPolicy/privacypolicy_page.dart';
+import 'package:propercloure/presentation/page/Term/term_page.dart';
 import 'package:propercloure/presentation/page/login/google_login_view_model.dart';
 import 'package:propercloure/presentation/page/login/apple_login_view_model.dart';
 
@@ -121,6 +123,60 @@ class LoginPage extends StatelessWidget {
                           fit: BoxFit.contain,
                         ),
                       ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  Padding(
+                    padding: const EdgeInsets.only(top: 24.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const PrivacyPolicyPage(),
+                              ),
+                            );
+                          },
+                          child: Text(
+                            '개인정보처리방침',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color:
+                                  Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? Colors.white
+                                  : Colors.black,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 24),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const TermsPage(),
+                              ),
+                            );
+                          },
+                          child: Text(
+                            '이용약관',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color:
+                                  Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? Colors.white
+                                  : Colors.black,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
