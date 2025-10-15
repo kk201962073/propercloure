@@ -8,12 +8,13 @@ import 'package:propercloure/presentation/page/pulse/pulse_view_model.dart';
 import 'package:propercloure/presentation/page/scren_theme/screntheme_view_model.dart';
 import 'package:propercloure/presentation/page/splash/splash_page.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -28,6 +29,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => PulseViewModel()),
         ChangeNotifierProvider(create: (_) => MinuseViewModel()),
         ChangeNotifierProvider(create: (_) => GuitarViewModel()),
+        ChangeNotifierProvider(create: (_) => ScrenThemeViewModel()),
         ChangeNotifierProvider(create: (_) => ScrenThemeViewModel()),
       ],
       child: Builder(

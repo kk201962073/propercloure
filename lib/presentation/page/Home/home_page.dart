@@ -174,7 +174,7 @@ class _HomePageState extends State<HomePage> {
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
                 onPressed: () {
-                  Navigator.pushReplacement(
+                  Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => const AiPage()),
                   );

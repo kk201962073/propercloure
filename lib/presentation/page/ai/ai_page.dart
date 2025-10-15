@@ -1,11 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:propercloure/presentation/page/home/home_page.dart';
+import 'package:propercloure/presentation/page/ai/ai_view_model.dart';
 
-class AiPage extends StatelessWidget {
-  const AiPage({Key? key}) : super(key: key);
+class AiPage extends ConsumerStatefulWidget {
+  const AiPage({super.key});
+
+  @override
+  ConsumerState<AiPage> createState() => _AiPageState();
+}
+
+class _AiPageState extends ConsumerState<AiPage> {
+  final TextEditingController _controller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
+    final messages = ref.watch(aiViewModel);
+    final notifier = ref.read(aiViewModel.notifier);
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -22,46 +34,116 @@ class AiPage extends StatelessWidget {
           },
         ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                '한달소비 분석',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                height: 250,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                alignment: Alignment.center,
-                child: const Text('내용 입력 부분'),
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                '피드백',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                height: 250,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                alignment: Alignment.center,
-                child: const Text('내용 입력 부분'),
-              ),
-            ],
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: messages.length,
+              itemBuilder: (context, index) {
+                final message = messages[index];
+                final isReceived = message.isReceived;
+                final text = message.content;
+
+                return Align(
+                  alignment: isReceived
+                      ? Alignment.centerLeft
+                      : Alignment.centerRight,
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    margin: const EdgeInsets.symmetric(vertical: 4),
+                    decoration: BoxDecoration(
+                      color: isReceived ? Colors.grey[300] : Colors.grey[400],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(text),
+                  ),
+                );
+              },
+            ),
           ),
-        ),
+          Container(
+            color: const Color(0xFFF7F7F7),
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: SafeArea(
+              bottom: true,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 0,
+                    ),
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          ElevatedButton(
+                            onPressed: () {
+                              notifier.send('피드백 해줘');
+                            },
+                            child: const Text('피드백 해줘'),
+                          ),
+                          const SizedBox(width: 8),
+                          ElevatedButton(
+                            onPressed: () {
+                              notifier.send('한달 소비현황 보여줘');
+                            },
+                            child: const Text('한달 소비현황 보여줘'),
+                          ),
+                          const SizedBox(width: 8),
+                          ElevatedButton(
+                            onPressed: () {
+                              notifier.send('소비패턴 분석 해줘');
+                            },
+                            child: const Text('소비패턴 분석 해줘'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 0,
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _controller,
+                            decoration: const InputDecoration(
+                              hintText: '메시지를 입력하세요',
+                              border: OutlineInputBorder(),
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
+                            ),
+                            onSubmitted: (value) {
+                              notifier.send(value);
+                              _controller.clear();
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          onPressed: () {
+                            notifier.send(_controller.text);
+                            _controller.clear();
+                          },
+                          child: const Text('전송'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
