@@ -8,12 +8,12 @@ class TransactionItemWidget extends StatelessWidget {
   final DateTime date;
 
   const TransactionItemWidget({
-    Key? key,
+    super.key,
     required this.docId,
     required this.amount,
     required this.category,
     required this.date,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

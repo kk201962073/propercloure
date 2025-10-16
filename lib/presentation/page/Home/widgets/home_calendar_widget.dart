@@ -4,7 +4,7 @@ import 'package:propercloure/presentation/page/Home/home_view_model.dart';
 import 'package:provider/provider.dart';
 
 class HomeCalendarWidget extends StatelessWidget {
-  const HomeCalendarWidget({Key? key}) : super(key: key);
+  const HomeCalendarWidget({super.key});
 
   @override
   Widget build(BuildContext context) {

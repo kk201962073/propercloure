@@ -18,7 +18,7 @@ class AiViewModel extends Notifier<List<Chat>> {
   }
 
   final _model = GenerativeModel(
-    model: 'gemini-2.0-flash',
+    model: 'gemini-2.5-flash',
     apiKey: const String.fromEnvironment('GEMINI_API_KEY'),
   );
 
@@ -30,6 +30,7 @@ class AiViewModel extends Notifier<List<Chat>> {
   }
 
   void send(String text) async {
+    print(const String.fromEnvironment('GEMINI_API_KEY'));
     state = [...state, Chat(content: text, isReceived: false)];
     await Future.delayed(const Duration(milliseconds: 100));
 

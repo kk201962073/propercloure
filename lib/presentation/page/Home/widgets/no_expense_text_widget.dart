@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class NoExpenseTextWidget extends StatelessWidget {
-  const NoExpenseTextWidget({Key? key}) : super(key: key);
+  const NoExpenseTextWidget({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -3,7 +3,7 @@ import 'package:propercloure/presentation/page/scren_theme/screntheme_view_model
 import 'package:provider/provider.dart';
 
 class ScrenThemePage extends StatefulWidget {
-  const ScrenThemePage({Key? key}) : super(key: key);
+  const ScrenThemePage({super.key});
 
   @override
   _ScrenThemePageState createState() => _ScrenThemePageState();

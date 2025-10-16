@@ -17,47 +17,58 @@ class AppleLoginViewModel extends ChangeNotifier {
           );
 
       print('Apple userIdentifier: ${credential.userIdentifier}');
+      print('Apple email: ${credential.email}');
+      print('Apple fullName: ${credential.givenName} ${credential.familyName}');
 
-      final OAuthCredential authCredential = OAuthProvider("apple.com")
-          .credential(
-            idToken: credential.identityToken,
-            accessToken: credential.authorizationCode,
-          );
+      final oAuthCredential = OAuthProvider("apple.com").credential(
+        idToken: credential.identityToken,
+        accessToken: credential.authorizationCode,
+      );
 
       final UserCredential userCredential = await _auth.signInWithCredential(
-        authCredential,
+        oAuthCredential,
       );
 
       final currentUser = userCredential.user;
-      if (currentUser != null) {
-        final userDocRef = FirebaseFirestore.instance
-            .collection("users")
-            .doc(currentUser.uid);
-        final snapshot = await userDocRef.get();
-
-        if (!snapshot.exists) {
-          final email = credential.email ?? currentUser.email ?? "unknown";
-          String fullName =
-              currentUser.displayName ??
-              "${credential.givenName ?? ''} ${credential.familyName ?? ''}"
-                  .trim();
-
-          await userDocRef.set({
-            "email": email,
-            "name": fullName.isEmpty ? "Apple User" : fullName,
-            "photoUrl": currentUser.photoURL,
-            "createdAt": FieldValue.serverTimestamp(),
-            "lastLogin": FieldValue.serverTimestamp(),
-          });
-        } else {
-          await userDocRef.update({"lastLogin": FieldValue.serverTimestamp()});
-        }
-
-        print('Firebase sign-in successful: ${currentUser.uid}');
-        return currentUser;
+      if (currentUser == null) {
+        print('Firebase user is null after Apple sign-in.');
+        return null;
       }
 
-      return null;
+      final userRef = FirebaseFirestore.instance
+          .collection("users")
+          .doc(currentUser.uid);
+      final docSnapshot = await userRef.get();
+
+      final email = credential.email ?? currentUser.email ?? "비공개 이메일";
+      final fullName =
+          (credential.givenName != null || credential.familyName != null)
+          ? "${credential.givenName ?? ''} ${credential.familyName ?? ''}"
+                .trim()
+          : currentUser.displayName ?? "Apple 사용자";
+
+      if (!docSnapshot.exists) {
+        await userRef.set({
+          "email": email,
+          "name": fullName,
+          "provider": "apple.com",
+          "createdAt": FieldValue.serverTimestamp(),
+          "lastLogin": FieldValue.serverTimestamp(),
+        });
+        print('새 Apple 사용자 문서 생성 완료');
+      } else {
+        await userRef.update({
+          "lastLogin": FieldValue.serverTimestamp(),
+          "provider": "apple.com",
+        });
+        print('기존 Apple 사용자 로그인 시간 갱신');
+      }
+
+      print('Firebase sign-in successful: ${currentUser.uid}');
+      print(
+        'Provider data: ${currentUser.providerData.map((e) => e.providerId).toList()}',
+      );
+      return currentUser;
     } on SignInWithAppleAuthorizationException catch (e) {
       if (e.code == AuthorizationErrorCode.canceled) {
         print('사용자가 Apple 로그인을 취소했습니다.');
@@ -66,7 +77,7 @@ class AppleLoginViewModel extends ChangeNotifier {
       }
       return null;
     } catch (e) {
-      print(' Unknown error during sign-in: $e');
+      print('Unknown Apple sign-in error: $e');
       return null;
     }
   }
