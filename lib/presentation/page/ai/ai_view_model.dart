@@ -16,7 +16,7 @@ class AiViewModel extends Notifier<List<Chat>> {
   List<Chat> build() {
     return [
       const Chat(
-        content: '안녕하세요! 아래 버튼을 눌러주세요 잠시만 기달리면 답변을 받을수 있습니다.',
+        content: '안녕하세요! 아래 버튼을 눌러주세요. 잠시만 기달리면 답변을 받을수 있습니다.',
         isReceived: true,
       ),
     ];
